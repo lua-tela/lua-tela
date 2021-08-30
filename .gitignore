@@ -11,7 +11,7 @@
 .mtj.tmp/
 
 # Package Files #
-# *.jar
+*.jar
 *.war
 *.nar
 *.ear
@@ -22,16 +22,12 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-# Netbeans
-**/nbproject/private/
-**/nbproject/Makefile-*.mk
-**/nbproject/Package-*.bash
-build/
-lib/
-bin/
-run/
-copier/apache-tomcat-8.5.63/
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
+# Intellij
+*.iml
+.idea/
+luatela-web/src/main/webapp/WEB-INF/temp.xml
+
+# Maven
+luatela-core/target/
+luatela-web/target/
+luatela-installer/target/

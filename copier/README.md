@@ -1,1 +1,0 @@
-This directory contains an extracted version of apache tomcat 8.5.63

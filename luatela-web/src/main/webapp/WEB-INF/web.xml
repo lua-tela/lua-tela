@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                      http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+  <display-name>LuaTela Web Application</display-name>
+  <listener>
+    <listener-class>com.hk.luatela.listener.MainListener</listener-class>
+  </listener>
+  <servlet>
+    <servlet-name>MainServlet</servlet-name>
+    <servlet-class>com.hk.luatela.servlet.MainServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>MainServlet</servlet-name>
+    <url-pattern>/*</url-pattern>
+  </servlet-mapping>
+  <context-param>
+    <param-name>dataroot</param-name>
+    <param-value>{{ DATA_ROOT }}</param-value>
+  </context-param>
+  <context-param>
+    <param-name>resourceroot</param-name>
+    <param-value>{{ RESOURCE_ROOT }}</param-value>
+  </context-param>
+  <context-param>
+    <param-name>resourcepath</param-name>
+    <param-value>{{ RESOURCE_PATH }}</param-value>
+  </context-param>
+  <context-param>
+    <param-name>datauser</param-name>
+    <param-value>{{ DATA_USER }}</param-value>
+  </context-param>
+  <context-param>
+    <param-name>datapass</param-name>
+    <param-value>{{ DATA_PASS }}</param-value>
+  </context-param>
+  <context-param>
+    <param-name>dataurl</param-name>
+    <param-value>{{ DATA_URL }}</param-value>
+  </context-param>
+</web-app>
