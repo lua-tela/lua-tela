@@ -7,6 +7,10 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.*;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.webapp.Configuration;
+import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.webapp.WebInfConfiguration;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletContextListener;
@@ -28,17 +32,14 @@ import static com.hk.luatela.installer.Installer.splitToLinesByLen;
 class RunCommand
 {
 	private final Scanner in;
-	private final URLClassLoader classLoader;
-	private final Path tempDir;
 
 	RunCommand(Scanner in, LinkedList<String> arguments)
 	{
 		this.in = in;
+		Path tempDir = null;
 		try
 		{
 			tempDir = Files.createTempDirectory("luatela");
-			Path classDir = tempDir.resolve("classes");
-			Path libDir = tempDir.resolve("libs");
 
 			InputStream stream = RunCommand.class.getResourceAsStream("/luatela.war");
 			ZipInputStream jarStream = new ZipInputStream(stream);
@@ -47,48 +48,18 @@ class RunCommand
 
 			while((e = jarStream.getNextEntry()) != null)
 			{
-				if(e.getName().startsWith("WEB-INF/classes") && !e.isDirectory())
-				{
-					Path newPath = classDir.resolve(e.getName().substring(16));
+				Path newPath = tempDir.resolve(e.getName());
 
-					newPath.getParent().toFile().mkdirs();
+				newPath.getParent().toFile().mkdirs();
 
-					OutputStream newStream = Files.newOutputStream(newPath);
-					IOUtil.copyTo(jarStream, newStream, 8192);
-					newStream.close();
-				}
-				else if(e.getName().startsWith("WEB-INF/lib") && !e.isDirectory())
-				{
-					Path newPath = libDir.resolve(e.getName().substring(12));
-
-					newPath.getParent().toFile().mkdirs();
-
-					OutputStream newStream = Files.newOutputStream(newPath);
-					IOUtil.copyTo(jarStream, newStream, 8192);
-					newStream.close();
-				}
+				OutputStream newStream = Files.newOutputStream(newPath);
+				IOUtil.copyTo(jarStream, newStream, 8192);
+				newStream.close();
 
 				jarStream.closeEntry();
 			}
 
 			jarStream.close();
-
-			LinkedList<File> files = new LinkedList<>();
-			files.addFirst(tempDir.toFile());
-
-			while(!files.isEmpty())
-			{
-				File file = files.removeFirst();
-				System.out.println(file.getAbsolutePath());
-
-				File[] fs = file.listFiles();
-
-				if (fs != null && fs.length > 0)
-					files.addAll(Arrays.asList(fs));
-			}
-
-			URL[] urls = new URL[] { classDir.toUri().toURL() };
-			this.classLoader = new URLClassLoader(urls, RunCommand.class.getClassLoader());
 
 			Server server = new Server();
 
@@ -96,25 +67,10 @@ class RunCommand
 			connector.setPort(8080);
 			server.setConnectors(new Connector[] { connector });
 
-//			TODO:
-//			WebAppContext context = new WebAppContext();
+			WebAppContext context = new WebAppContext();
+			context.setWar(tempDir.toString());
 
-			ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-			server.setHandler(handler);
-
-			handler.setInitParameter("dataroot", "");
-
-			Class<? extends Servlet> mainServlet = classLoader
-					.loadClass("com.hk.luatela.servlet.MainServlet")
-					.asSubclass(Servlet.class);
-
-			handler.addServlet(mainServlet, "/*");
-
-			Class<? extends ServletContextListener> mainListener = classLoader
-				.loadClass("com.hk.luatela.listener.MainListener")
-				.asSubclass(ServletContextListener.class);
-
-			handler.addEventListener(mainListener.newInstance());
+			context.setConfigurations(new Configuration[] { new WebInfConfiguration() });
 
 			server.start();
 
@@ -130,13 +86,15 @@ class RunCommand
 			}
 
 			server.stop();
-
-			FileUtil.deleteDirectory(tempDir.toFile());
-			classLoader.close();
 		}
 		catch (Exception e)
 		{
 			throw new RuntimeException(e);
+		}
+		finally
+		{
+			if(tempDir != null)
+				FileUtil.deleteDirectory(tempDir.toFile());
 		}
 	}
 

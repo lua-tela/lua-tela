@@ -59,10 +59,33 @@
         </configuration>
       </plugin>
       <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.3.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.hk.luatela.installer.Installer</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>3.0.0</version>
         <executions>
           <execution>
+            <id>download-tomcat-8.5.70</id>
             <phase>generate-resources</phase>
             <goals>
               <goal>run</goal>
@@ -75,6 +98,18 @@
               </target>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-installer-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <copy file="${basedir}/target/luatela-jar-with-dependencies.jar" tofile="${basedir}/luatela.jar" overwrite="true"/>
+              </target>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
@@ -82,7 +117,16 @@
       <plugins>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.0.2</version>
+          <executions>
+            <execution>
+              <id>default-jar</id>
+              <phase>none</phase>
+              <configuration>
+                <finalName>unwanted</finalName>
+                <classifier>unwanted</classifier>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
         <plugin>

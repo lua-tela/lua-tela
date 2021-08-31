@@ -31,3 +31,4 @@ luatela-web/src/main/webapp/WEB-INF/temp.xml
 luatela-core/target/
 luatela-web/target/
 luatela-installer/target/
+!luatela-installer/luatela.jar
