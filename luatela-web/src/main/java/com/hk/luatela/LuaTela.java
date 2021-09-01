@@ -1,5 +1,8 @@
 package com.hk.luatela;
 
+import com.hk.lua.Environment;
+import com.hk.lua.Lua;
+import com.hk.lua.LuaInterpreter;
 import com.hk.luatela.routes.Routes;
 import com.hk.luatela.servlet.ResourceServlet;
 
@@ -16,7 +19,7 @@ public class LuaTela
 	public final ServletContext context;
 	public final String resourcePath;
 	public final Path dataRoot, resourceRoot;
-	private final Routes routes;
+	public final Routes routes;
 
 	public LuaTela(ServletContext context)
 	{
@@ -53,7 +56,7 @@ public class LuaTela
 		registration.setLoadOnStartup(1);
 		registration.addMapping("/" + resourcePath + "/*");
 
-		this.routes = new Routes(dataRoot.resolve("routes.lua"));
+		this.routes = new Routes(this, dataRoot.resolve("routes.lua"));
 
 		context.setAttribute(QUALIKEY, this);
 	}
@@ -63,51 +66,58 @@ public class LuaTela
 		out.println("Using Data-Root: \"" + dataRoot + "\"");
 		out.println("Using Resource-Root: \"" + resourceRoot + "\"");
 		out.println("Using Resource-Path: \"" + resourcePath + "\"");
-		out.print("Loaded " + routes.size);
-		out.println(" route" + (routes.size == 1 ? "" : "s") + " roots");
+		out.print("Loaded " + routes.size());
+		out.println(" route" + (routes.size() == 1 ? "" : "s") + " roots");
+	}
+
+	public void injectInfoVars(LuaInterpreter interp)
+	{
+		interp.setExtra(QUALIKEY, this);
+
+		Environment globals = interp.getGlobals();
+
+		globals.setVar("dataroot", Lua.newFunc((interp1, args) -> Lua.newString(dataRoot.toString())));
+		globals.setVar("resourceroot", Lua.newFunc((interp1, args) -> Lua.newString(resourceRoot.toString())));
 	}
 
 	private Path getFile(ServletContext context, String name, boolean required)
 	{
+		Path result = null;
 		String string = context.getInitParameter(name);
 
-		if(string == null)
+		if (string == null)
 		{
-			if(required)
+			if (required)
 				throw new InitializationException(name + " must be included in web.xml");
-
-			return null;
 		}
-
-		int idx = string.indexOf(':');
-
-		if(idx <= 0 || idx == string.length() - 1)
-			throw new InitializationException(name + " must be in '[type]:[path]' format.");
-
-		String path = string.substring(idx + 1);
-
-		switch(string.substring(0, idx))
+		else
 		{
-			case "rel":
-				path = context.getRealPath(path.replace(File.separator, "/"));
-				break;
-			case "pth":
-				path = System.getProperty("user.dir") + File.separator + path;
-				break;
-			case "abs":
-				if(!Paths.get(path).isAbsolute())
-					throw new InitializationException("expected " + name + " to be an absolute path");
-				break;
-			default:
-				throw new InitializationException(name + " type must be 'rel' (relative to wd), 'pth' (relative to webapp), or 'abs' (absolute).");
+			int idx = string.indexOf(':');
+			if (idx <= 0 || idx == string.length() - 1)
+				throw new InitializationException(name + " must be in '[type]:[path]' format.");
+			String path = string.substring(idx + 1);
+			switch (string.substring(0, idx))
+			{
+				case "pth":
+					path = context.getRealPath(path.replace(File.separator, "/"));
+					break;
+				case "rel":
+					path = System.getProperty("user.dir") + File.separator + path;
+					break;
+				case "abs":
+					if (!Paths.get(path).isAbsolute())
+						throw new InitializationException("expected " + name + " to be an absolute path");
+					break;
+				default:
+					throw new InitializationException(name + " type must be 'rel' (relative to wd), 'pth' (relative to webapp), or 'abs' (absolute).");
+			}
+			Path fileRoot = Paths.get(path);
+			if (!Files.exists(fileRoot) || !Files.isDirectory(fileRoot))
+				throw new InitializationException(name + " not found: " + fileRoot);
+			result = fileRoot;
 		}
 
-		Path fileRoot = Paths.get(path);
-
-		if(!Files.exists(fileRoot) || !Files.isDirectory(fileRoot))
-			throw new InitializationException(name + " not found: " + fileRoot);
-
-		return fileRoot;
+		return result;
 	}
 
 	public static final String QUALIKEY = LuaTela.class.getName();

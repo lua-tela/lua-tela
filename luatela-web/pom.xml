@@ -45,6 +45,7 @@
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <webApp>
+            <contextPath>/my/what/*</contextPath>
             <descriptor>${basedir}\src\main\webapp\WEB-INF\temp.xml</descriptor>
           </webApp>
         </configuration>

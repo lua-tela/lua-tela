@@ -1,6 +1,7 @@
 package com.hk.luatela.servlet;
 
 import com.hk.luatela.LuaTela;
+import com.hk.luatela.routes.Route;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -27,7 +28,17 @@ public class MainServlet extends HttpServlet
 		}
 		else
 		{
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			String path = request.getRequestURI();
+			String url = request.getRequestURL().substring(0, request.getRequestURL().length() - path.length());
+			String ctx = request.getContextPath();
+			path = path.substring(ctx.length());
+
+			Route route = luaTela.routes.match(url, ctx, path);
+
+			if(route != null)
+			{
+				luaTela.routes.attemptServe(route, request, response);
+			}
 		}
 	}
 
