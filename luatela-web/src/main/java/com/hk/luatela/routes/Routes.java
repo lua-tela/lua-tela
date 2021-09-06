@@ -5,8 +5,10 @@ import com.hk.lua.LuaException;
 import com.hk.lua.LuaInterpreter;
 import com.hk.lua.LuaLibrary;
 import com.hk.luatela.InitializationException;
+import com.hk.luatela.LuaContext;
 import com.hk.luatela.LuaTela;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -77,9 +79,9 @@ public class Routes
 		return null;
 	}
 
-	public void attemptServe(Route route, HttpServletRequest request, HttpServletResponse response)
+	public void attemptServe(Route route, LuaContext context) throws ServletException, IOException
 	{
-		route.serve(request, response);
+		route.serve(context);
 	}
 
 	boolean newRoute(Route route)

@@ -1,5 +1,6 @@
 package com.hk.luatela.servlet;
 
+import com.hk.luatela.LuaContext;
 import com.hk.luatela.LuaTela;
 import com.hk.luatela.routes.Route;
 
@@ -28,17 +29,11 @@ public class MainServlet extends HttpServlet
 		}
 		else
 		{
-			String path = request.getRequestURI();
-			String url = request.getRequestURL().substring(0, request.getRequestURL().length() - path.length());
-			String ctx = request.getContextPath();
-			path = path.substring(ctx.length());
-
-			Route route = luaTela.routes.match(url, ctx, path);
+			LuaContext context = new LuaContext(luaTela, request, response, method);
+			Route route = luaTela.routes.match(context.url, context.ctx, context.path);
 
 			if(route != null)
-			{
-				luaTela.routes.attemptServe(route, request, response);
-			}
+				luaTela.routes.attemptServe(route, context);
 		}
 	}
 

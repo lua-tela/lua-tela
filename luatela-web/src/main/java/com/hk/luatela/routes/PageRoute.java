@@ -1,14 +1,11 @@
 package com.hk.luatela.routes;
 
-import com.hk.lua.Lua;
-import com.hk.lua.LuaFactory;
-import com.hk.lua.LuaInterpreter;
-import com.hk.lua.LuaLibrary;
+import com.hk.lua.*;
 import com.hk.luatela.InitializationException;
+import com.hk.luatela.LuaContext;
 import com.hk.luatela.LuaTela;
+import com.hk.luatela.luacompat.HTMLLibrary;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,10 +24,17 @@ class PageRoute extends Route
 		try
 		{
 			factory = Lua.factory(Files.newBufferedReader(source));
+
+			factory.compile();
 		}
 		catch (IOException e)
 		{
 			throw new InitializationException(e);
+		}
+		catch (LuaException e)
+		{
+			e.printStackTrace();
+			throw new InitializationException("There was a problem compiling " + source);
 		}
 	}
 
@@ -41,13 +45,16 @@ class PageRoute extends Route
 	}
 
 	@Override
-	void serve(HttpServletRequest request, HttpServletResponse response)
+	void serve(LuaContext context) throws IOException
 	{
 		LuaInterpreter interp = factory.build();
 
 		LuaLibrary.importStandard(interp);
 		luaTela.injectInfoVars(interp);
+		interp.importLib(new LuaLibrary<>("html", HTMLLibrary.class));
 
-		interp.execute();
+		Object res = interp.execute();
+		if(res instanceof LuaObject && !((LuaObject) res).isNil())
+			handle(interp, (LuaObject) res, context.response.getWriter(), context.path);
 	}
 }
