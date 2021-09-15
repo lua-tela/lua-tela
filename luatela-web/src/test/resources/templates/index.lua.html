@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+{[
+function kingpin()
+    return "Hello World!"
+end
+
+table = {
+    my='Stuff'
+}
+print("Has stuff")
+]}
+<html>
+    <title>{{ kingpin }}</title>
+    <h3>Table</h3>
+    <table>
+        <tr>
+            <th>Key</th>
+            <th>Value</th>
+        </tr>
+        {[ for k, v in pairs(table) do ]}
+        <tr>
+            <td>{{ k }}</td>
+            <td>{{ v }}</td>
+        </tr>
+        {[ end ]}
+    </table>
+</html>
