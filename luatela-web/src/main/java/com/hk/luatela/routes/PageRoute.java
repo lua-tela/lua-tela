@@ -5,6 +5,7 @@ import com.hk.luatela.InitializationException;
 import com.hk.luatela.LuaContext;
 import com.hk.luatela.LuaTela;
 import com.hk.luatela.luacompat.HTMLLibrary;
+import com.hk.luatela.luacompat.RequestLibrary;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,7 +24,7 @@ class PageRoute extends Route
 
 		try
 		{
-			factory = Lua.factory(Files.newBufferedReader(source));
+			factory = Lua.factory(source.toFile());
 
 			factory.compile();
 		}
@@ -49,9 +50,12 @@ class PageRoute extends Route
 	{
 		LuaInterpreter interp = factory.build();
 
+		interp.setExtra("context", context);
+
 		LuaLibrary.importStandard(interp);
 		luaTela.injectInfoVars(interp);
 		interp.importLib(new LuaLibrary<>("html", HTMLLibrary.class));
+		interp.importLib(new LuaLibrary<>("request", RequestLibrary.class));
 
 		Object res = interp.execute();
 		if(res instanceof LuaObject && !((LuaObject) res).isNil())

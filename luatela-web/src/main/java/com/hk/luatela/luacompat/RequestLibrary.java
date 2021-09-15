@@ -4,6 +4,9 @@ import com.hk.func.BiConsumer;
 import com.hk.lua.*;
 import com.hk.luatela.LuaContext;
 
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -144,8 +147,9 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 
-			if(ctx.request.getSession().isNew())
-				ctx.request.getSession().setAttribute("lua", new HashMap<>());
+			HttpSession session = ctx.request.getSession();
+			if(session.isNew())
+				session.setAttribute("lua", new HashMap<>());
 		}
 	},
 	hasSess() {

@@ -9,8 +9,14 @@
 --- path('/johndoe-homepage/contact-me')
 --- path('/johndoe-homepage', '/contact-me')
 --- path('/johndoe', '-', 'homepage', '/contact-me')
----
-
+--- path('/johndoe-homepage').path('/contact-me')
+--- path('/johndoe-', 'homepage').path('/contact-me')
 
 path('/').topage('index')
 path('/contact').topage()
+path('/johndoe-homepage', path('/contact', '-me')).topage('johndoepage')
+
+--- request table
+local requestPth = path('/request')
+
+requestPth.path('/params').topage()

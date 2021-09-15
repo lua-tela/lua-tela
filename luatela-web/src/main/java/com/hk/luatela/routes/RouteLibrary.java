@@ -2,7 +2,6 @@ package com.hk.luatela.routes;
 
 import com.hk.func.BiConsumer;
 import com.hk.lua.*;
-import com.hk.luatela.InitializationException;
 
 import java.io.File;
 import java.nio.file.Files;
