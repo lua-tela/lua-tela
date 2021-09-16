@@ -1,0 +1,13 @@
+{-[
+    function foogaze(exp)
+        return 2 ^ exp
+    end
+]-}
+{
+    "numbers": [
+        1
+        {-[ for i=1, 10 do ]-}
+            ,{{ foogaze(i) }}
+        {-[ end ]-}
+    ]
+}

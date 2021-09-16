@@ -1,22 +1,78 @@
 package com.hk.luatela.luacompat;
 
-import com.hk.lua.LuaFactory;
+import com.hk.lua.*;
+import com.hk.str.StringUtil;
 
-import java.io.IOException;
-import java.io.LineNumberReader;
-import java.io.Reader;
+import java.io.*;
+import java.util.Stack;
 
 public class LuaTemplate
 {
     private final LuaFactory factory;
+    private final String metName;
 
     public LuaTemplate(Reader source) throws TemplateException, IOException
     {
         TemplateReader rdr = new TemplateReader(source);
 
-        rdr.compile();
+        metName = "_" + Long.toHexString(System.currentTimeMillis());
+        factory = rdr.compile();
+        factory.compile();
 
-        factory = null;
+        factory.addLibrary(LuaLibrary.BASIC);
+        factory.addLibrary(LuaLibrary.COROUTINE);
+        factory.addLibrary(LuaLibrary.STRING);
+        factory.addLibrary(LuaLibrary.TABLE);
+        factory.addLibrary(LuaLibrary.MATH);
+        factory.addLibrary(LuaLibrary.IO);
+        factory.addLibrary(LuaLibrary.OS);
+        factory.addLibrary(LuaLibrary.JSON);
+        factory.addLibrary(LuaLibrary.HASH);
+        factory.addLibrary(LuaLibrary.DATE);
+    }
+    public LuaInterpreter create(Writer writer)
+    {
+        LuaInterpreter interp = factory.build();
+
+        interp.getGlobals().setVar(metName, Lua.newFunc((interp2, args) -> {
+            try
+            {
+                String s;
+                for (LuaObject arg : args)
+                {
+                    s = arg.getString(interp2);
+                    System.out.println("<< " + s + " >>");
+                    writer.append(s);
+                }
+            }
+            catch (IOException ex)
+            {
+                throw new UncheckedIOException(ex);
+            }
+
+            return null;
+        }));
+        return interp;
+    }
+
+    private void print(StringBuilder txt, StringBuilder lua)
+    {
+        if(txt.length() == 0)
+            return;
+
+        int amt = 0;
+
+        while(txt.indexOf("[" + StringUtil.repeat("=", amt) + "[") != -1 ||
+                txt.indexOf("]" + StringUtil.repeat("=", amt) + "]") != -1)
+            amt++;
+
+        String s = StringUtil.repeat("=", amt);
+
+        lua.append('\n').append(metName).append("([").append(s).append('[');
+        lua.append(txt);
+        lua.append(']').append(s).append("]);");
+
+        txt.setLength(0);
     }
 
     private class TemplateReader
@@ -28,13 +84,14 @@ public class LuaTemplate
             this.source = new LineNumberReader(source);
         }
 
-        void compile() throws IOException
+        LuaFactory compile() throws TemplateException, IOException
         {
             int i;
             char c;
             boolean trim;
 
-            StringBuilder lua = new StringBuilder();
+            StringBuilder txt = new StringBuilder();
+            StringBuilder lua = new StringBuilder("local " + metName + " = " + metName + ";");
             loop:
             while((i = source.read()) >= 0)
             {
@@ -42,8 +99,6 @@ public class LuaTemplate
 
                 if(c == '{')
                 {
-                    source.mark(2);
-
                     i = source.read();
 
                     if(i >= 0)
@@ -57,7 +112,7 @@ public class LuaTemplate
 
                             if(i == -1)
                             {
-                                lua.append("{-");
+                                txt.append("{-");
                                 continue;
                             }
                             else
@@ -72,17 +127,19 @@ public class LuaTemplate
                         {
                             if(trim)
                             {
-                                for(int j = lua.length() - 1; j >= 0; j--)
+                                for(int j = txt.length() - 1; j >= 0; j--)
                                 {
-                                    if(!Character.isWhitespace(lua.charAt(j)))
-                                        lua.setLength(j + 1);
+                                    if(!Character.isWhitespace(txt.charAt(j)))
+                                    {
+                                        txt.setLength(j + 1);
+                                        break;
+                                    }
                                 }
                             }
 
-                            if(c == '{')
-                                trim = readValue(lua);
-                            else
-                                trim = readBlock(lua);
+                            print(txt, lua);
+
+                            trim = read(txt, lua, c == '[');
 
                             if(trim)
                             {
@@ -97,56 +154,127 @@ public class LuaTemplate
                                     c = (char) i;
 
                                     if(!Character.isWhitespace(c))
+                                    {
                                         source.reset();
+                                        break;
+                                    }
                                 }
                             }
 
                             continue;
                         }
                         else
-                            source.reset();
+                            txt.append('{');
                     }
                 }
 
-                lua.append(c);
+                txt.append(c);
             }
 
             source.close();
 
-            System.out.println(lua);
+            print(txt, lua);
+
+            String code = lua.toString();
+            System.out.println(code);
+            return Lua.factory(code);
         }
 
-        private boolean readValue(StringBuilder lua)
+        private boolean read(StringBuilder txt, StringBuilder lua, boolean block) throws TemplateException, IOException
         {
-            return false;
-        }
+            String type = block ? "block" : "value";
+            boolean close, trim = false;
+            int i;
+            char c;
+            Stack<Character> ops = new Stack<>();
 
-        private boolean readBlock(StringBuilder lua)
-        {
-            return false;
+            while(true)
+            {
+                i = source.read();
+
+                if (i == -1)
+                    throw new TemplateException("Unexpected <eof>, expected closing " + type);
+
+                c = (char) i;
+
+                close = false;
+                switch (c) {
+                    case '{':
+                    case '(':
+                    case '[':
+                        ops.push(c);
+                        txt.append(c);
+                        break;
+                    case ')':
+                        if (!ops.isEmpty() && ops.peek() == '(')
+                            ops.pop();
+                        txt.append(c);
+                        break;
+                    case ']':
+                        if (!ops.isEmpty() && ops.peek() == '[') {
+                            ops.pop();
+                            txt.append(c);
+                        } else if (block && ops.isEmpty())
+                            close = true;
+                        else
+                            txt.append(c);
+                        break;
+                    case '}':
+                        if (!ops.isEmpty() && ops.peek() == '{') {
+                            ops.pop();
+                            txt.append(c);
+                        } else if (!block && ops.isEmpty())
+                            close = true;
+                        else
+                            txt.append(c);
+                        break;
+                    default:
+                        txt.append(c);
+                }
+
+                if (ops.isEmpty() && close) {
+                    source.mark(2);
+                    i = source.read();
+
+                    if (i == -1)
+                        throw new TemplateException("Unexpected <eof>, expected closing " + type);
+
+                    c = (char) i;
+
+                    if (c == '-') {
+                        trim = true;
+
+                        i = source.read();
+
+                        if (i == -1)
+                            throw new TemplateException("Unexpected <eof>, expected closing " + type);
+
+                        c = (char) i;
+                    }
+
+                    if (c == '}')
+                        break;
+                    else
+                        source.reset();
+                }
+            }
+
+            if(block)
+                lua.append('\n').append(txt);
+            else
+                lua.append('\n').append(metName).append('(').append(txt).append(");");
+
+            txt.setLength(0);
+
+            return trim;
         }
     }
 
-    public class TemplateException extends Exception
+    public static class TemplateException extends Exception
     {
-        public TemplateException()
-        {
-            super();
-        }
-
-        public TemplateException(String message)
+        private TemplateException(String message)
         {
             super(message);
-        }
-
-        public TemplateException(String message, Throwable cause)
-        {
-            super(message, cause);
-        }
-
-        public TemplateException(Throwable cause)
-        {
-            super(cause);
         }
     }
 }
