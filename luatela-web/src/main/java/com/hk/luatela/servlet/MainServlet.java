@@ -34,6 +34,8 @@ public class MainServlet extends HttpServlet
 
 			if(route != null)
 				luaTela.routes.attemptServe(route, context);
+			else
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		}
 	}
 

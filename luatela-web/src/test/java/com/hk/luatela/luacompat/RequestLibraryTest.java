@@ -33,7 +33,7 @@ public class RequestLibraryTest
 		assertEquals("params", getMethod.getResponseBodyAsString());
 	}
 
-//	@Test
+	@Test
 	public void testHasParam() throws IOException
 	{
 		GetMethod getMethod = new GetMethod("/request/params/hasParam");

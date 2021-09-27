@@ -9,13 +9,11 @@ import java.util.Stack;
 public class LuaTemplate
 {
     private final LuaFactory factory;
-    private final String metName;
 
     public LuaTemplate(Reader source) throws TemplateException, IOException
     {
         TemplateReader rdr = new TemplateReader(source);
 
-        metName = "_" + Long.toHexString(System.currentTimeMillis());
         factory = rdr.compile();
         factory.compile();
 
@@ -30,28 +28,12 @@ public class LuaTemplate
         factory.addLibrary(LuaLibrary.HASH);
         factory.addLibrary(LuaLibrary.DATE);
     }
+
     public LuaInterpreter create(Writer writer)
     {
         LuaInterpreter interp = factory.build();
 
-        interp.getGlobals().setVar(metName, Lua.newFunc((interp2, args) -> {
-            try
-            {
-                String s;
-                for (LuaObject arg : args)
-                {
-                    s = arg.getString(interp2);
-                    System.out.println("<< " + s + " >>");
-                    writer.append(s);
-                }
-            }
-            catch (IOException ex)
-            {
-                throw new UncheckedIOException(ex);
-            }
-
-            return null;
-        }));
+        interp.setExtra(LuaLibraryIO.EXKEY_STDOUT, new LuaWriter(writer));
         return interp;
     }
 
@@ -68,7 +50,9 @@ public class LuaTemplate
 
         String s = StringUtil.repeat("=", amt);
 
-        lua.append('\n').append(metName).append("([").append(s).append('[');
+        lua.append('\n').append("stdout:write([").append(s).append("[");
+        if(txt.length() > 0 && txt.charAt(0) == '\n')
+            lua.append('\n');
         lua.append(txt);
         lua.append(']').append(s).append("]);");
 
@@ -91,7 +75,7 @@ public class LuaTemplate
             boolean trim;
 
             StringBuilder txt = new StringBuilder();
-            StringBuilder lua = new StringBuilder("local " + metName + " = " + metName + ";");
+            StringBuilder lua = new StringBuilder("local stdout = io.output()");
             loop:
             while((i = source.read()) >= 0)
             {
@@ -127,14 +111,13 @@ public class LuaTemplate
                         {
                             if(trim)
                             {
-                                for(int j = txt.length() - 1; j >= 0; j--)
+                                int j;
+                                for(j = txt.length() - 1; j >= 0; j--)
                                 {
                                     if(!Character.isWhitespace(txt.charAt(j)))
-                                    {
-                                        txt.setLength(j + 1);
                                         break;
-                                    }
                                 }
+                                txt.setLength(j + 1);
                             }
 
                             print(txt, lua);
@@ -175,9 +158,7 @@ public class LuaTemplate
 
             print(txt, lua);
 
-            String code = lua.toString();
-            System.out.println(code);
-            return Lua.factory(code);
+            return Lua.factory(lua.toString());
         }
 
         private boolean read(StringBuilder txt, StringBuilder lua, boolean block) throws TemplateException, IOException
@@ -262,7 +243,7 @@ public class LuaTemplate
             if(block)
                 lua.append('\n').append(txt);
             else
-                lua.append('\n').append(metName).append('(').append(txt).append(");");
+                lua.append('\n').append("stdout:write(").append(txt).append(");");
 
             txt.setLength(0);
 

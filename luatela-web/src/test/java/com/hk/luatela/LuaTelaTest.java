@@ -50,16 +50,16 @@ public class LuaTelaTest extends Assert
 
 		assertEquals(200, client.executeMethod(response));
 
-		String html = "<!DOCTYPE html>\n";
-		html += "<html>\n";
-		html += "\t<head>\n";
-		html += "\t\t<title>Hello World!</title>\n";
-		html += "\t</head>\n";
-		html += "\t<body>\n";
-		html += "\t\tThis is my line, there are many like it but this one is mine.\n";
-		html += "\t\t<magic number=\"27913\"/>\n";
-		html += "\t</body>\n";
-		html += "</html>";
+		String html = "<!DOCTYPE html>\n" +
+				"<html>\n" +
+				"\t<head>\n" +
+				"\t\t<title>Hello World!</title>\n" +
+				"\t</head>\n" +
+				"\t<body>\n" +
+				"\t\tThis is my line, there are many like it but this one is mine.\n" +
+				"\t\t<magic number=\"27913\"/>\n" +
+				"\t</body>\n" +
+				"</html>";
 		assertEquals(html, response.getResponseBodyAsString());
 	}
 

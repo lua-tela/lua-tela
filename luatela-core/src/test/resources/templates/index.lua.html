@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-{[
+{-[
 function kingpin()
     return "Hello World!"
 end
 
 table = {
-    my='Stuff'
+    all='my',
+    friends='is',
+    a='lowrider',
 }
-print("Has stuff")
 ]}
 <html>
-    <title>{{ kingpin }}</title>
+    <title>{{ kingpin() }}</title>
     <h3>Table</h3>
     <table>
         <tr>
@@ -22,6 +23,6 @@ print("Has stuff")
             <td>{{ k }}</td>
             <td>{{ v }}</td>
         </tr>
-        {[ end ]-}
+        {-[ end ]}
     </table>
 </html>

@@ -1,50 +1,17 @@
 package com.hk.luatela.luacompat;
 
-import com.hk.lua.Environment;
-import com.hk.lua.Lua;
 import com.hk.lua.LuaInterpreter;
-import com.hk.lua.LuaObject;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+
+import static org.junit.Assert.assertEquals;
 
 public class LuaTemplateTest
 {
-    @Test
-    public void testStuff()
-    {
-        String code = "local _17bec62c9f1 = _17bec62c9f1;\n" +
-//                "\n" +
-//                "    function foogaze(exp)\n" +
-//                "        return 2 ^ exp\n" +
-//                "    end\n" +
-//                "\n" +
-//                "_17bec62c9f1([[{\n" +
-//                "    \"numbers\": [\n" +
-//                "        1]]);\n" +
-//                " for i=1, 10 do \n" +
-//                "_17bec62c9f1([[,]]);\n" +
-//                "_17bec62c9f1( foogaze(i) );\n" +
-//                "_17bec62c9f1([[\n" +
-//                "        ]]);\n" +
-//                " end \n" +
-//                "_17bec62c9f1([[]\n" +
-//                "}]]);";
-                "_17bec62c9f1([[]   }]]);";
-
-        LuaInterpreter interp = Lua.reader(code);
-
-        interp.getGlobals().setVar("_17bec62c9f1", Lua.newFunc((interp2, args) -> {
-            for(LuaObject arg : args)
-            {
-                System.out.println(arg.getString(interp2));
-            }
-            return null;
-        }));
-
-        interp.execute();
-    }
-
     @Test
     public void testJsonData() throws IOException, LuaTemplate.TemplateException
     {
@@ -55,15 +22,51 @@ public class LuaTemplateTest
 
         LuaTemplate template = new LuaTemplate(new InputStreamReader(stream));
 
-        Writer wtr = new CharArrayWriter();
+        StringWriter wtr = new StringWriter();
         LuaInterpreter interp = template.create(wtr);
 
-        Object result = interp.execute();
+        interp.execute();
         wtr.close();
-        System.out.println("-----------------");
-        System.out.println(wtr);
+        assertEquals("{\n    \"numbers\": [\n        1,2,4,8,16,32,64,128,256,512,1024\n    ]\n}", wtr.toString());
+    }
 
-        if(result instanceof LuaObject)
-            System.out.println("result = " + result);
+    @Test
+    public void testHTMLData() throws IOException, LuaTemplate.TemplateException
+    {
+        InputStream stream = LuaTemplateTest.class.getResourceAsStream("/templates/index.lua.html");
+
+        if(stream == null)
+            throw new NullPointerException();
+
+        LuaTemplate template = new LuaTemplate(new InputStreamReader(stream));
+
+        StringWriter wtr = new StringWriter();
+        LuaInterpreter interp = template.create(wtr);
+
+        interp.execute();
+        wtr.close();
+        assertEquals("<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "    <title>Hello World!</title>\n" +
+                "    <h3>Table</h3>\n" +
+                "    <table>\n" +
+                "        <tr>\n" +
+                "            <th>Key</th>\n" +
+                "            <th>Value</th>\n" +
+                "        </tr>\n" +
+                "        <tr>\n" +
+                "            <td>all</td>\n" +
+                "            <td>my</td>\n" +
+                "        </tr>\n" +
+                "        <tr>\n" +
+                "            <td>friends</td>\n" +
+                "            <td>is</td>\n" +
+                "        </tr>\n" +
+                "        <tr>\n" +
+                "            <td>a</td>\n" +
+                "            <td>lowrider</td>\n" +
+                "        </tr>\n" +
+                "    </table>\n" +
+                "</html>", wtr.toString());
     }
 }

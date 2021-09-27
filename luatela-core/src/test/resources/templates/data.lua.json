@@ -1,6 +1,6 @@
 {-[
     function foogaze(exp)
-        return 2 ^ exp
+        return math.floor(2 ^ exp)
     end
 ]-}
 {
@@ -8,6 +8,6 @@
         1
         {-[ for i=1, 10 do ]-}
             ,{{ foogaze(i) }}
-        {-[ end ]-}
+        {-[ end ]}
     ]
 }
