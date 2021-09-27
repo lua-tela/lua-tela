@@ -3,6 +3,8 @@ package com.hk.luatela;
 import com.hk.lua.Environment;
 import com.hk.lua.Lua;
 import com.hk.lua.LuaInterpreter;
+import com.hk.lua.LuaLibrary;
+import com.hk.luatela.luacompat.ContextLibrary;
 import com.hk.luatela.routes.Routes;
 import com.hk.luatela.servlet.ResourceServlet;
 
@@ -70,14 +72,18 @@ public class LuaTela
 		out.println(" route" + (routes.size() == 1 ? "" : "s") + " roots");
 	}
 
-	public void injectInfoVars(LuaInterpreter interp)
+	public void injectInto(LuaInterpreter interp)
 	{
 		interp.setExtra(QUALIKEY, this);
 
+		interp.importLib(new LuaLibrary<>("context", ContextLibrary.class));
+/*
 		Environment globals = interp.getGlobals();
 
 		globals.setVar("dataroot", Lua.newFunc((interp1, args) -> Lua.newString(dataRoot.toString())));
 		globals.setVar("resourceroot", Lua.newFunc((interp1, args) -> Lua.newString(resourceRoot.toString())));
+*/
+
 	}
 
 	private Path getFile(ServletContext context, String name, boolean required)
@@ -118,6 +124,26 @@ public class LuaTela
 		}
 
 		return result;
+	}
+
+	public static String escapeHTML(String s)
+	{
+		StringBuilder out = new StringBuilder(Math.max(16, s.length()));
+		for (int i = 0; i < s.length(); i++)
+		{
+			char c = s.charAt(i);
+			if (c > 127 || c == '"' || c == '<' || c == '>' || c == '&')
+			{
+				out.append("&#");
+				out.append((int) c);
+				out.append(';');
+			}
+			else
+			{
+				out.append(c);
+			}
+		}
+		return out.toString();
 	}
 
 	public static final String QUALIKEY = LuaTela.class.getName();

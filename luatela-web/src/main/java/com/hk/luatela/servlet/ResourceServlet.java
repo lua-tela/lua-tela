@@ -17,12 +17,12 @@ import java.nio.file.Paths;
 
 public class ResourceServlet extends HttpServlet
 {
-	static void serveFile(ServletContext context, HttpServletRequest request, HttpServletResponse response, Path path) throws IOException
+	public static void serveFile(ServletContext context, HttpServletRequest request, HttpServletResponse response, Path path) throws IOException
 	{
 		serveFile(context, request, response, path, null);
 	}
 
-	static void serveFile(ServletContext context, HttpServletRequest request, HttpServletResponse response, Path path, String mime) throws IOException
+	public static void serveFile(ServletContext context, HttpServletRequest request, HttpServletResponse response, Path path, String mime) throws IOException
 	{
 		if(!Files.exists(path))
 		{

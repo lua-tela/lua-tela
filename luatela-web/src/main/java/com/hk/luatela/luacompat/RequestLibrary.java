@@ -4,14 +4,12 @@ import com.hk.func.BiConsumer;
 import com.hk.lua.*;
 import com.hk.luatela.LuaContext;
 
-import javax.net.ssl.HandshakeCompletedEvent;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unused", "unchecked"})
 public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMethod
 {
 	hasParam() {
@@ -186,7 +184,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			Map<String, Object> map =
 					(Map<String, Object>) ctx.request.getSession().getAttribute("lua");
 			map.put(args[0].getString(), toObj(args[1]));
-			return Lua.nil();
+			return Lua.newBoolean(true);
 		}
 	},
 	removeSess() {
@@ -205,7 +203,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			else
 				ctx.request.getSession().invalidate();
 
-			return Lua.nil();
+			return Lua.newBoolean(true);
 		}
 	},
 	getSessID() {

@@ -17,12 +17,12 @@ public class MainServlet extends HttpServlet
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response, String method) throws ServletException, IOException
 	{
 		LuaTela luaTela = ((LuaTela) getServletContext().getAttribute(LuaTela.QUALIKEY));
-		if(request.getRequestURI().equals("/favicon.ico"))
+		if(request.getRequestURI().equals("/favicon.ico") && method.equals("get"))
 		{
 			Path path = luaTela.resourceRoot.resolve("favicon.ico");
 			ResourceServlet.serveFile(getServletContext(), request, response, path);
 		}
-		else if(request.getRequestURI().equals("/robots.txt"))
+		else if(request.getRequestURI().equals("/robots.txt") && method.equals("get"))
 		{
 			Path path = luaTela.resourceRoot.resolve("robots.txt");
 			ResourceServlet.serveFile(getServletContext(), request, response, path);

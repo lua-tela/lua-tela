@@ -1,5 +1,6 @@
 package com.hk.luatela.routes;
 
+import com.hk.collections.lists.SortedList;
 import com.hk.lua.Lua;
 import com.hk.lua.LuaException;
 import com.hk.lua.LuaInterpreter;
@@ -9,17 +10,14 @@ import com.hk.luatela.LuaContext;
 import com.hk.luatela.LuaTela;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.TreeSet;
 
 public class Routes
 {
 	public final LuaTela luaTela;
-	private final TreeSet<Route> routeSet;
+	private final SortedList<Route> routeSet;
 
 	public Routes(LuaTela luaTela, Path routesPath)
 	{
@@ -47,11 +45,11 @@ public class Routes
 		LuaLibrary.importStandard(interp);
 		interp.importLib(new LuaLibrary<>(null, RouteLibrary.class));
 
-		luaTela.injectInfoVars(interp);
+		luaTela.injectInto(interp);
 
 		interp.setExtra("routes", this);
 
-		routeSet = new TreeSet<>(new Route.Comp());
+		routeSet = new SortedList<>(new Route.Comp());
 
 		try
 		{

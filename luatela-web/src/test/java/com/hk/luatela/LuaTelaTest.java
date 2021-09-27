@@ -1,16 +1,22 @@
 package com.hk.luatela;
 
+import com.hk.io.IOUtil;
 import com.hk.json.Json;
 import com.hk.json.JsonObject;
 import com.hk.json.JsonValue;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class LuaTelaTest extends Assert
 {
@@ -19,36 +25,40 @@ public class LuaTelaTest extends Assert
 	@Before
 	public void setUp()
 	{
-		client = new HttpClient();
-		client.setHostConfiguration(config);
+		client = HttpClients.createDefault();
 	}
 
 	@Test
 	public void testServer() throws IOException
 	{
-		GetMethod response = new GetMethod();
+		HttpGet request = new HttpGet();
 
-		assertEquals(200, client.executeMethod(response));
+		HttpResponse response = client.execute(LuaTelaTest.config, request);
 
+		assertEquals(200, response.getStatusLine().getStatusCode());
 	}
 
 	@Test
 	public void testIndex() throws IOException
 	{
-		GetMethod response = new GetMethod("/");
+		HttpGet request = new HttpGet("/");
 
-		assertEquals(200, client.executeMethod(response));
+		HttpResponse response = client.execute(LuaTelaTest.config, request);
 
-		assertEquals("this is the index, here is my magic number: 70831",
-				response.getResponseBodyAsString());
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		String content = EntityUtils.toString(response.getEntity());
+		assertEquals("this is the index, here is my magic number: 70831", content);
 	}
 
 	@Test
 	public void testContact() throws IOException
 	{
-		GetMethod response = new GetMethod("/contact");
+		HttpGet request = new HttpGet("/contact");
 
-		assertEquals(200, client.executeMethod(response));
+		HttpResponse response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
 
 		String html = "<!DOCTYPE html>\n" +
 				"<html>\n" +
@@ -60,7 +70,7 @@ public class LuaTelaTest extends Assert
 				"\t\t<magic number=\"27913\"/>\n" +
 				"\t</body>\n" +
 				"</html>";
-		assertEquals(html, response.getResponseBodyAsString());
+		assertEquals(html, EntityUtils.toString(response.getEntity()));
 	}
 
 	@Test
@@ -69,25 +79,28 @@ public class LuaTelaTest extends Assert
 		// Assert that when a page does not exist, it attempts to fall
 		// to a parent path
 
-		GetMethod response = new GetMethod("/does-not/exist");
+		HttpGet request = new HttpGet("/does-not/exist");
+		HttpResponse response = client.execute(LuaTelaTest.config, request);
 
-		assertEquals(200, client.executeMethod(response));
-		assertTrue(response.getResponseBodyAsString().contains("70831"));
+		assertEquals(200, response.getStatusLine().getStatusCode());
 
-		response = new GetMethod("/contact/does-not/exist");
+		assertTrue(EntityUtils.toString(response.getEntity()).contains("70831"));
 
-		assertEquals(200, client.executeMethod(response));
-		assertTrue(response.getResponseBodyAsString().contains("27913"));
+		request = new HttpGet("/contact/does-not/exist");
+
+		response = client.execute(LuaTelaTest.config, request);
+		assertEquals(200, response.getStatusLine().getStatusCode());
 	}
 
 	@Test
 	public void testPaths() throws IOException
 	{
-		GetMethod response = new GetMethod("/johndoe-homepage/contact-me");
+		HttpGet request = new HttpGet("/johndoe-homepage/contact-me");
 
-		assertEquals(200, client.executeMethod(response));
+		HttpResponse response = client.execute(LuaTelaTest.config, request);
+		assertEquals(200, response.getStatusLine().getStatusCode());
 
-		JsonObject json = Json.read(response.getResponseBodyAsString()).getObject();
+		JsonObject json = Json.read(response.getEntity().getContent()).getObject();
 
 		assertTrue(json.contains("key"));
 		assertTrue(json.get("key").isString());
@@ -96,29 +109,30 @@ public class LuaTelaTest extends Assert
 		assertEquals("/johndoe-homepage/contact-me", json.getString("path"));
 	}
 
-	public static HostConfiguration config;
+	public static HttpHost config;
 
 	static
 	{
 		try
 		{
-			config = new HostConfiguration();
-			JsonValue val = Json.read(LuaTelaTest.class.getResource("/host.json"));
+			JsonValue val = Json.read(Objects.requireNonNull(LuaTelaTest.class.getResource("/host.json")));
 			JsonObject obj = val.getObject();
+			String host;
+			int port;
 
 			if(obj.contains("host"))
 			{
-				String host = obj.getString("host");
+				host = obj.getString("host");
 				if(obj.contains("port"))
 				{
-					int port = obj.getInt("port");
+					port = obj.getInt("port");
 					if(obj.contains("protocol"))
-						config.setHost(host, port, obj.getString("protocol"));
+						config = new HttpHost(host, port, obj.getString("protocol"));
 					else
-						config.setHost(host, port);
+						config = new HttpHost(host, port);
 				}
 				else
-					config.setHost(host);
+					config = new HttpHost(host);
 			}
 			else
 				throw new IllegalStateException("No host.json resource to read host from?");

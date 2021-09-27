@@ -20,3 +20,6 @@ path('/johndoe-homepage', path('/contact', '-me')).topage('johndoepage')
 local requestPth = path('/request')
 
 requestPth.path('/params').topage()
+requestPth.path('/paths').topage()
+requestPth.path('/sessions').topage()
+requestPth.path('/files').topage()

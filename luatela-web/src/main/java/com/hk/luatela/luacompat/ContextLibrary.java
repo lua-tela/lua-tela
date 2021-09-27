@@ -1,0 +1,172 @@
+package com.hk.luatela.luacompat;
+
+import com.hk.func.BiConsumer;
+import com.hk.lua.*;
+import com.hk.lua.Lua.LuaMethod;
+import com.hk.luatela.LuaTela;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+
+@SuppressWarnings({"unused", "unchecked"})
+public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMethod
+{
+    realPath() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+
+            LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
+            return Lua.newString(luaTela.context.getRealPath(args[0].getString()));
+        }
+    },
+    hasAttr() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+
+            LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
+            Map<String, LuaObject> map = (Map<String, LuaObject>) luaTela.context.getAttribute("lua");
+            return Lua.newBoolean(map.containsKey(args[0].getString()));
+        }
+    },
+    getAttr() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+
+            LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
+            Map<String, LuaObject> map = (Map<String, LuaObject>) luaTela.context.getAttribute("lua");
+            return Lua.newLuaObject(map.get(args[0].getString()));
+        }
+    },
+    getAttrNames() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+
+            LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
+            Map<String, LuaObject> map = (Map<String, LuaObject>) luaTela.context.getAttribute("lua");
+            return Lua.newLuaObject(map.keySet());
+        }
+        
+        @Override
+        public void accept(Environment env, LuaObject table)
+        {
+            super.accept(env, table);
+
+            LuaTela luaTela = env.interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
+            luaTela.context.setAttribute("lua", new HashMap<>());
+        }
+    },
+    setAttr() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING, LuaType.ANY);
+
+            LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
+            Map<String, LuaObject> map = (Map<String, LuaObject>) luaTela.context.getAttribute("lua");
+            map.put(args[0].getString(), args[1]);
+            return Lua.nil();
+        }
+    },
+    removeAttr() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+
+            LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
+            Map<String, LuaObject> map = (Map<String, LuaObject>) luaTela.context.getAttribute("lua");
+            LuaObject obj = map.remove(args[0].getString());
+            return obj == null ? Lua.nil() : obj;
+        }
+    },
+    escapeHTML() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+            return Lua.newString(LuaTela.escapeHTML(args[0].getString()));
+        }
+    },
+    getMimeType() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+
+            LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
+            return Lua.newString(luaTela.context.getMimeType(args[0].getString()));
+        }
+    },
+    res() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+
+            String url = interp.getExtra("url", String.class);
+            try
+            {
+                return Lua.newString(url + "/res/" + URLEncoder.encode(args[0].getString(), "UTF-8"));
+            }
+            catch (UnsupportedEncodingException ex)
+            {
+                throw new Error();
+            }
+        }
+    },
+    urlEncode() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+            try
+            {
+                return Lua.newString(URLEncoder.encode(args[0].getString(), "UTF-8"));
+            }
+            catch (UnsupportedEncodingException ex)
+            {
+                throw new Error();
+            }
+        }
+    },
+    urlDecode() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+            try
+            {
+                return Lua.newString(URLDecoder.decode(args[0].getString(), "UTF-8"));
+            }
+            catch (UnsupportedEncodingException ex)
+            {
+                throw new Error();
+            }
+        }
+    };
+    
+    @Override
+    public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+    {
+        throw new Error();
+    }
+
+    @Override
+    public void accept(Environment env, LuaObject table)
+    {
+        String name = toString();
+        if(name != null && !name.trim().isEmpty())
+            table.setIndex(env.interp, name, Lua.newFunc(this));
+    }
+}
