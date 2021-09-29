@@ -31,3 +31,9 @@ responsePth.path('/content-type').topage()
 responsePth.path('/content-size').topage()
 responsePth.path('/headers').topage()
 responsePth.path('/status').topage()
+responsePth.path('/serve').topage()
+responsePth.path('/redirects').topage()
+
+local contextPth = path('/context')
+
+contextPth.path('/paths').topage()

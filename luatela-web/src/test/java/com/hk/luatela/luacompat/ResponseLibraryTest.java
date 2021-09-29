@@ -61,7 +61,7 @@ public class ResponseLibraryTest
 
 		assertNotNull(contentType);
 		assertEquals("application/json", contentType.getMimeType());
-		assertNotNull(contentType.getCharset());
+		assertNull(contentType.getCharset());
 
 		request = new HttpGet("/response/content-type.html");
 		response = client.execute(LuaTelaTest.config, request);
@@ -212,6 +212,78 @@ public class ResponseLibraryTest
 
 		entity = response.getEntity();
 		assertEquals("90005", EntityUtils.toString(entity));
+	}
+
+	@Test
+	public void testServe() throws IOException
+	{
+		String[] arr = {
+				"this", "is", "my",
+				"line", "there", "are",
+				"many", "like", "it",
+				"but", "this", "one",
+				"is", "mine",
+		};
+		HttpGet request;
+		HttpResponse response;
+		HttpEntity entity;
+
+		request = new HttpGet("/response/serve");
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		entity = response.getEntity();
+		assertEquals("11000", EntityUtils.toString(entity));
+
+		request = new HttpGet("/response/serve/my.txt");
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		entity = response.getEntity();
+		assertArrayEquals(arr, EntityUtils.toString(entity).split("\r?\n"));
+
+		request = new HttpGet("/response/serve/my.css");
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		entity = response.getEntity();
+		assertArrayEquals(arr, EntityUtils.toString(entity).split("\r?\n"));
+
+		request = new HttpGet("/response/serve/does.not.exist");
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(404, response.getStatusLine().getStatusCode());
+
+		entity = response.getEntity();
+		assertEquals("11001", EntityUtils.toString(entity));
+	}
+
+	@Test
+	public void testRedirect() throws IOException {
+		HttpGet request;
+		HttpResponse response;
+		HttpEntity entity;
+		int statusCode;
+		String location = "/response/redirects";
+
+		while(true)
+		{
+			request = new HttpGet(location);
+			response = client.execute(LuaTelaTest.config, request);
+			statusCode = response.getStatusLine().getStatusCode();
+
+			if(statusCode == 302)
+				location = response.getFirstHeader("Location").getValue();
+			else
+				break;
+		}
+
+		entity = response.getEntity();
+		assertEquals("/response/redirects/destination", location);
+		assertEquals("12000", EntityUtils.toString(entity));
 	}
 
 	@After

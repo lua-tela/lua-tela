@@ -9,6 +9,7 @@ elseif url == '.json' then
 
     return 60001
 elseif url == '.html' then
+    assert(response.setContentEncoding("UTF-8"))
     assert(response.setContentType("text/html"))
 
     return 60002

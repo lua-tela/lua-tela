@@ -6,6 +6,7 @@ import com.hk.luatela.LuaContext;
 import com.hk.luatela.servlet.ResourceServlet;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
@@ -34,6 +35,19 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
 
             env.interp.getExtra("context", LuaContext.class)
                     .response.setContentType("text/plain");
+        }
+    },
+    setContentEncoding() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+
+            LuaContext ctx = interp.getExtra("context", LuaContext.class);
+
+            ctx.response.setCharacterEncoding(args[0].getString());
+
+            return Lua.newBoolean(true);
         }
     },
     setContentSize() {
@@ -89,7 +103,12 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
 
             try
             {
-                Path path = ctx.luaTela.resourceRoot.resolve(args[0].getString());
+                String str = args[0].getString();
+
+                if(str.startsWith("/") || str.startsWith("\\") || str.startsWith(File.separator))
+                    str = str.substring(1);
+                
+                Path path = ctx.luaTela.resourceRoot.resolve(str);
                 return Lua.newBoolean(ResourceServlet.serveFile(
                         ctx.luaTela.context, ctx.request,
                         ctx.response, path, contentType));
@@ -116,7 +135,7 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
                 throw new UncheckedIOException(ex);
             }
 
-            return Lua.nil();
+            return Lua.newBoolean(true);
         }
     };
 

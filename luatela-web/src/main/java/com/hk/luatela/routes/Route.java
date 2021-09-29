@@ -6,9 +6,11 @@ import com.hk.luatela.LuaContext;
 import com.hk.luatela.LuaTela;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Comparator;
 
@@ -25,7 +27,7 @@ public abstract class Route
 
 	abstract void serve(LuaContext context) throws ServletException, IOException;
 
-	static void handle(LuaInterpreter interp, LuaObject obj, Writer writer, String path) throws IOException
+	static void handle(LuaInterpreter interp, LuaObject obj, PrintWriter writer, String path) throws IOException
 	{
 		if(obj.isFunction())
 		{

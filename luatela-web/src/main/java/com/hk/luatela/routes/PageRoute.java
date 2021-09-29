@@ -8,8 +8,10 @@ import com.hk.luatela.luacompat.HTMLLibrary;
 import com.hk.luatela.luacompat.RequestLibrary;
 import com.hk.luatela.luacompat.ResponseLibrary;
 
+import javax.servlet.ServletOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.nio.file.Path;
 
 class PageRoute extends Route
@@ -51,8 +53,6 @@ class PageRoute extends Route
 	{
 		LuaInterpreter interp = factory.build();
 
-		PrintWriter wtr = context.response.getWriter();
-		interp.setExtra(LuaLibraryIO.EXKEY_STDOUT, new LuaWriter(wtr));
 		interp.setExtra("context", context);
 
 		LuaLibrary.importStandard(interp);
@@ -63,6 +63,6 @@ class PageRoute extends Route
 
 		Object res = interp.execute();
 		if(res instanceof LuaObject && !((LuaObject) res).isNil())
-			handle(interp, (LuaObject) res, wtr, context.path);
+			handle(interp, (LuaObject) res, context.response.getWriter(), context.path);
 	}
 }
