@@ -5,8 +5,11 @@ import com.hk.lua.*;
 import com.hk.luatela.LuaContext;
 import com.hk.luatela.servlet.ResourceServlet;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @SuppressWarnings("unused")
@@ -21,7 +24,16 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
 
             ctx.response.setContentType(args[0].getString());
 
-            return Lua.nil();
+            return Lua.newBoolean(true);
+        }
+
+        @Override
+        public void accept(Environment env, LuaObject table)
+        {
+            super.accept(env, table);
+
+            env.interp.getExtra("context", LuaContext.class)
+                    .response.setContentType("text/plain");
         }
     },
     setContentSize() {
@@ -33,7 +45,7 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
 
             ctx.response.setContentLengthLong(args[0].getInteger());
 
-            return Lua.nil();
+            return Lua.newBoolean(true);
         }
     },
     setHeader() {
@@ -44,7 +56,7 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
             LuaContext ctx = interp.getExtra("context", LuaContext.class);
 
             ctx.response.setHeader(args[0].getString(), args[1].getString());
-            return Lua.nil();
+            return Lua.newBoolean(true);
         }
     },
     setStatus() {
@@ -55,7 +67,7 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
             LuaContext ctx = interp.getExtra("context", LuaContext.class);
 
             ctx.response.setStatus((int) args[0].getInteger());
-            return Lua.nil();
+            return Lua.newBoolean(true);
         }
     },
     serve() {
@@ -67,24 +79,25 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
 
             if(args.length > 1)
             {
-                if(args[1].type() != LuaType.STRING)
+                if(args[1].isString())
+                    contentType = args[1].getString();
+                else if(!args[1].isNil())
                     throw new LuaException("bad argument #2 to '" + name() + "' (string or nil expected)");
-
-                contentType = args[1].getString();
             }
 
             LuaContext ctx = interp.getExtra("context", LuaContext.class);
 
             try
             {
-                ResourceServlet.serveFile(ctx.luaTela.context, ctx.request, ctx.response,
-                                            Paths.get(args[0].getString()), contentType);
+                Path path = ctx.luaTela.resourceRoot.resolve(args[0].getString());
+                return Lua.newBoolean(ResourceServlet.serveFile(
+                        ctx.luaTela.context, ctx.request,
+                        ctx.response, path, contentType));
             }
             catch (IOException ex)
             {
                 throw new RuntimeException(ex);
             }
-            return Lua.nil();
         }
     },
     redirect() {

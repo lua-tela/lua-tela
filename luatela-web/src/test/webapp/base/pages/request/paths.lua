@@ -1,3 +1,6 @@
+assert(request.path)
+assert(type(request.path) == 'string')
+
 local url = request.path:match("/request/paths(.*)")
 
 assert(url)
@@ -5,9 +8,9 @@ assert(request.ctx == '')
 assert(request.url:sub(1, 4) == 'http')
 
 if url == '' then
-    return 92713
+    return 30000
 elseif url == '/this/is/my/path' then
-    return 50245
+    return 30001
 else
-    return 69213
+    return 30002
 end

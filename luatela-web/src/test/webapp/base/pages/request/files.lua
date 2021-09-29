@@ -5,7 +5,7 @@ assert(url)
 if url == '' then
     assert(not request.FILES)
 
-    return 81142
+    return 10000
 elseif url == '/info.txt' then
     assert(request.FILES)
 
@@ -20,7 +20,7 @@ elseif url == '/info.txt' then
     assert(request.hasParam("alsopost"))
     assert(request.getParam("alsopost") == 'exists')
 
-    return 10231
+    return 10001
 end
 
 error('not a valid path')

@@ -13,6 +13,7 @@ import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,7 +45,7 @@ public class RequestLibraryTest
 
 		assertEquals(200, response.getStatusLine().getStatusCode());
 
-		assertEquals("81142", EntityUtils.toString(response.getEntity()));
+		assertEquals("20000", EntityUtils.toString(response.getEntity()));
 
 		String query = URLEncodedUtils.format(Arrays.asList(
 				new BasicNameValuePair("key1", "value1"),
@@ -59,7 +60,7 @@ public class RequestLibraryTest
 
 		assertEquals(200, response.getStatusLine().getStatusCode());
 
-		assertEquals("true", EntityUtils.toString(response.getEntity()));
+		assertEquals("20001", EntityUtils.toString(response.getEntity()));
 	}
 
 	@Test
@@ -72,38 +73,39 @@ public class RequestLibraryTest
 		response = client.execute(LuaTelaTest.config, request);
 
 		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals("92713", EntityUtils.toString(response.getEntity()));
+		assertEquals("30000", EntityUtils.toString(response.getEntity()));
 
 		request = new HttpGet("/request/paths/this/is/my/path");
 		response = client.execute(LuaTelaTest.config, request);
 
 		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals("50245", EntityUtils.toString(response.getEntity()));
+		assertEquals("30001", EntityUtils.toString(response.getEntity()));
 
 		request = new HttpGet("/request/paths/fallthrough");
 		response = client.execute(LuaTelaTest.config, request);
 
 		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals("69213", EntityUtils.toString(response.getEntity()));
+		assertEquals("30002", EntityUtils.toString(response.getEntity()));
 	}
 
 	@Test
 	public void testSessions() throws IOException
 	{
-		String expected = "39610";
 		HttpGet request;
 		HttpResponse response;
 		String cookie = null;
 		String[] paths = { "new", "test", "check", "remove", "new" };
+		int[] expected = { 40000, 40001, 40002, 40003, 40000 };
 
-		for(String path : paths)
+		for (int i = 0; i < paths.length; i++)
 		{
+			String path = paths[i];
 			request = new HttpGet("/request/sessions/" + path);
-			if(cookie != null)
+			if (cookie != null)
 				request.setHeader("Cookie", cookie);
 			response = client.execute(LuaTelaTest.config, request);
 
-			if(cookie == null)
+			if (cookie == null)
 			{
 				Header setCookie = response.getFirstHeader("Set-Cookie");
 				assertNotNull(setCookie);
@@ -113,7 +115,7 @@ public class RequestLibraryTest
 			}
 
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertEquals(expected, EntityUtils.toString(response.getEntity()));
+			assertEquals(Integer.toString(expected[i]), EntityUtils.toString(response.getEntity()));
 		}
 	}
 
@@ -128,7 +130,7 @@ public class RequestLibraryTest
 		response = client.execute(LuaTelaTest.config, getRequest);
 
 		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals("81142", EntityUtils.toString(response.getEntity()));
+		assertEquals("10000", EntityUtils.toString(response.getEntity()));
 
 		postRequest = new HttpPost("/request/files/info.txt");
 
@@ -145,6 +147,50 @@ public class RequestLibraryTest
 		response = client.execute(LuaTelaTest.config, postRequest);
 
 		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals("10231", EntityUtils.toString(response.getEntity()));
+		assertEquals("10001", EntityUtils.toString(response.getEntity()));
+	}
+
+	@Test
+	public void testHeaders() throws IOException
+	{
+		HttpGet request;
+		HttpResponse response;
+
+		request = new HttpGet("/request/headers");
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("70000", EntityUtils.toString(response.getEntity()));
+
+		for(int i = 0; i < 9; i++)
+		{
+			int count = 1 << i;
+			request = new HttpGet("/request/headers/test" + count);
+
+			for (int j = 1; j <= count; j++)
+				request.setHeader("Header" + j, "Value" + j);
+
+			response = client.execute(LuaTelaTest.config, request);
+
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(Integer.toString(70000 + count), EntityUtils.toString(response.getEntity()));
+		}
+
+		request = new HttpGet("/request/headers/test-names");
+
+		String[] strs = "this is my header there are many like it but this one is mine".split(" ");
+		for(String str : strs)
+			request.setHeader(str, "");
+
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(Integer.toString(70005), EntityUtils.toString(response.getEntity()));
+	}
+
+	@After
+	public void tearDown()
+	{
+		client = null;
 	}
 }

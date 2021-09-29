@@ -5,6 +5,7 @@ import com.hk.lua.*;
 import com.hk.luatela.LuaContext;
 
 import javax.servlet.http.HttpSession;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,7 +17,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		@Override
 		public LuaObject call(LuaInterpreter interp, LuaObject[] args)
 		{
-			Lua.checkArgs(toString(), args, LuaType.STRING);
+			Lua.checkArgs(name(), args, LuaType.STRING);
 
 			Map<String, LuaObject> params = interp.getExtra("params", Map.class);
 
@@ -35,7 +36,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		@Override
 		public LuaObject call(LuaInterpreter interp, LuaObject[] args)
 		{
-			Lua.checkArgs(toString(), args, LuaType.STRING);
+			Lua.checkArgs(name(), args, LuaType.STRING);
 
 			Map<String, LuaObject> params = interp.getExtra("params", Map.class);
 
@@ -64,7 +65,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, toString(), Lua.newString(ctx.request.getRemoteHost()));
+				table.setIndex(env.interp, name(), Lua.newString(ctx.request.getRemoteHost()));
 		}
 	},
 	port() {
@@ -73,7 +74,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, toString(), Lua.newNumber(ctx.request.getRemotePort()));
+				table.setIndex(env.interp, name(), Lua.newNumber(ctx.request.getRemotePort()));
 		}
 	},
 	user() {
@@ -82,7 +83,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, toString(), Lua.newString(ctx.request.getRemoteUser()));
+				table.setIndex(env.interp, name(), Lua.newString(ctx.request.getRemoteUser()));
 		}
 	},
 	address() {
@@ -91,7 +92,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, toString(), Lua.newString(ctx.request.getRemoteAddr()));
+				table.setIndex(env.interp, name(), Lua.newString(ctx.request.getRemoteAddr()));
 		}
 	},
 	method() {
@@ -100,7 +101,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, toString(), Lua.newString(ctx.method));
+				table.setIndex(env.interp, name(), Lua.newString(ctx.method));
 		}
 	},
 	url() {
@@ -109,7 +110,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, toString(), Lua.newString(ctx.url));
+				table.setIndex(env.interp, name(), Lua.newString(ctx.url));
 		}
 	},
 	ctx() {
@@ -118,7 +119,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, toString(), Lua.newString(ctx.ctx));
+				table.setIndex(env.interp, name(), Lua.newString(ctx.ctx));
 		}
 	},
 	path() {
@@ -127,7 +128,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, toString(), Lua.newString(ctx.path));
+				table.setIndex(env.interp, name(), Lua.newString(ctx.path));
 		}
 	},
 	isNewSess() {
@@ -154,7 +155,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		@Override
 		public LuaObject call(LuaInterpreter interp, LuaObject[] args)
 		{
-			Lua.checkArgs(toString(), args, LuaType.STRING);
+			Lua.checkArgs(name(), args, LuaType.STRING);
 
 			LuaContext ctx = interp.getExtra("context", LuaContext.class);
 			Map<String, Object> map =
@@ -166,7 +167,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		@Override
 		public LuaObject call(LuaInterpreter interp, LuaObject[] args)
 		{
-			Lua.checkArgs(toString(), args, LuaType.STRING);
+			Lua.checkArgs(name(), args, LuaType.STRING);
 
 			LuaContext ctx = interp.getExtra("context", LuaContext.class);
 			Map<String, Object> map =
@@ -178,7 +179,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		@Override
 		public LuaObject call(LuaInterpreter interp, LuaObject[] args)
 		{
-			Lua.checkArgs(toString(), args, LuaType.STRING, LuaType.ANY);
+			Lua.checkArgs(name(), args, LuaType.STRING, LuaType.ANY);
 
 			LuaContext ctx = interp.getExtra("context", LuaContext.class);
 			Map<String, Object> map =
@@ -196,7 +197,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 					(Map<String, Object>) ctx.request.getSession().getAttribute("lua");
 			if(args.length > 0)
 			{
-				Lua.checkArgs(toString(), args, LuaType.STRING);
+				Lua.checkArgs(name(), args, LuaType.STRING);
 				Object obj = map.remove(args[0].getString());
 				return obj == null ? Lua.nil() : Lua.newLuaObject(obj);
 			}
@@ -212,6 +213,43 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = interp.getExtra("context", LuaContext.class);
 			return Lua.newString(ctx.request.getSession().getId());
+		}
+	},
+	getHeader() {
+		@Override
+		public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+		{
+			Lua.checkArgs(name(), args, LuaType.STRING);
+			LuaContext ctx = interp.getExtra("context", LuaContext.class);
+			return Lua.newString(ctx.request.getHeader(args[0].getString()));
+		}
+	},
+	getHeaders() {
+		@Override
+		public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+		{
+			LuaContext ctx = interp.getExtra("context", LuaContext.class);
+			LuaObject tbl = Lua.nil();
+			Enumeration<String> values;
+			if(args.length == 0)
+			{
+				values = ctx.request.getHeaderNames();
+			}
+			else
+			{
+				Lua.checkArgs(name(), args, LuaType.STRING);
+				values = ctx.request.getHeaders(args[0].getString());
+			}
+
+			long idx = 1;
+			while(values.hasMoreElements())
+			{
+				if(idx == 1)
+					tbl = Lua.newTable();
+
+				tbl.rawSet(idx++, Lua.newString(values.nextElement()));
+			}
+			return tbl;
 		}
 	},
 	FILES() {

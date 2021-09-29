@@ -32,16 +32,18 @@ public class LuaTela
 
 		String resourcePath = context.getInitParameter("resourcepath");
 
-		if(resourcePath == null)
+		if(resourcePath != null)
+		{
+			if (resourcePath.startsWith("/"))
+				resourcePath = resourcePath.substring(1);
+			if (resourcePath.endsWith("/"))
+				resourcePath = resourcePath.substring(0, resourcePath.length() - 1);
+
+			if (!resourcePath.matches("[a-zA-Z0-9/\\-.]+"))
+				throw new InitializationException("resourcepath should only contain letters (a-z), numbers (0-9), slashes (/), dashes (-), and periods (.)");
+		}
+		else
 			resourcePath = "res";
-
-		if(resourcePath.startsWith("/"))
-			resourcePath = resourcePath.substring(1);
-		if(resourcePath.endsWith("/"))
-			resourcePath = resourcePath.substring(0, resourcePath.length() - 1);
-
-		if(!resourcePath.matches("[a-zA-Z0-9/\\-.]+"))
-			throw new InitializationException("resourcepath should only contain letters (a-z), numbers (0-9), slashes (/), dashes (-), and periods (.)");
 
 		this.resourcePath = resourcePath;
 

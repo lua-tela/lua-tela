@@ -17,22 +17,22 @@ import java.nio.file.Paths;
 
 public class ResourceServlet extends HttpServlet
 {
-	public static void serveFile(ServletContext context, HttpServletRequest request, HttpServletResponse response, Path path) throws IOException
+	public static boolean serveFile(ServletContext context, HttpServletRequest request, HttpServletResponse response, Path path) throws IOException
 	{
-		serveFile(context, request, response, path, null);
+		return serveFile(context, request, response, path, null);
 	}
 
-	public static void serveFile(ServletContext context, HttpServletRequest request, HttpServletResponse response, Path path, String mime) throws IOException
+	public static boolean serveFile(ServletContext context, HttpServletRequest request, HttpServletResponse response, Path path, String mime) throws IOException
 	{
 		if(!Files.exists(path))
 		{
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			return;
+			return false;
 		}
 		if(Files.isDirectory(path))
 		{
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			return;
+			return false;
 		}
 
 		if(mime == null)
@@ -52,6 +52,7 @@ public class ResourceServlet extends HttpServlet
 		IOUtil.copyTo(in, out);
 		out.close();
 		in.close();
+		return true;
 	}
 
 	@Override

@@ -3,7 +3,7 @@ local url = request.path:match("/request/params(.*)")
 assert(url)
 
 if url == '' then
-    return 81142
+    return 20000
 end
 
 assert(request.hasParam 'key1')
@@ -22,4 +22,4 @@ assert(request.getParam('keyB') == '4')
 assert(request.getParam('keyC') == nil)
 assert(request.getParam('keyD') == '8')
 
-return 'true'
+return 20001
