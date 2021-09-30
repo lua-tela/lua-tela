@@ -5,9 +5,12 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -24,7 +27,7 @@ public class ResponseLibraryTest
 	@Before
 	public void setUp()
 	{
-		client = HttpClients.createDefault();
+		client = HttpClients.custom().setRedirectStrategy(new DefaultRedirectStrategy(new String[0])).build();
 	}
 
 	@Test
@@ -282,7 +285,7 @@ public class ResponseLibraryTest
 		}
 
 		entity = response.getEntity();
-		assertEquals("/response/redirects/destination", location);
+		assertTrue(location.endsWith("/response/redirects/destination"));
 		assertEquals("12000", EntityUtils.toString(entity));
 	}
 

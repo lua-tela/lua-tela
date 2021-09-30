@@ -93,8 +93,8 @@
             </goals>
             <configuration>
               <target>
-                <get src="https://downloads.apache.org/tomcat/tomcat-8/v8.5.70/bin/apache-tomcat-8.5.70.zip"
-                     dest="${basedir}/src/main/resources/apache-tomcat-8.5.70.zip"
+                <get src="https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.71/bin/apache-tomcat-8.5.71.zip"
+                     dest="${basedir}/src/main/resources/apache-tomcat-8.5.71.zip"
                      skipexisting="true"/>
               </target>
             </configuration>
