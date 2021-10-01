@@ -2,8 +2,9 @@ local url = request.path:match("/context/paths(.*)")
 
 assert(url)
 
-if url == '' then
-    return 13000
-end
+assert(context.realPath("WEB-INF"))
+assert(context.realPath("base/pages") == context.dataPath("pages"))
+assert(context.realPath("base/res") == context.dataPath("res"))
+assert(context.dataPath("res/my.txt") == context.resPath("my.txt"))
 
-error('not a valid path')
+return 13000

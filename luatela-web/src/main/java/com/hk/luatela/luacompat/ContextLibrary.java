@@ -5,6 +5,7 @@ import com.hk.lua.*;
 import com.hk.lua.Lua.LuaMethod;
 import com.hk.luatela.LuaTela;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -22,6 +23,32 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
 
             LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
             return Lua.newString(luaTela.context.getRealPath(args[0].getString()));
+        }
+    },
+    dataPath() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+
+            LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
+            String str = args[0].getString();
+            if(str.startsWith("/") || str.startsWith("\\") || str.startsWith(File.separator))
+                str = str.substring(1);
+            return Lua.newString(luaTela.dataRoot.resolve(str).toString());
+        }
+    },
+    resPath() {
+        @Override
+        public LuaObject call(LuaInterpreter interp, LuaObject[] args)
+        {
+            Lua.checkArgs(toString(), args, LuaType.STRING);
+
+            LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
+            String str = args[0].getString();
+            if(str.startsWith("/") || str.startsWith("\\") || str.startsWith(File.separator))
+                str = str.substring(1);
+            return Lua.newString(luaTela.resourceRoot.resolve(str).toString());
         }
     },
     hasAttr() {
@@ -43,7 +70,7 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
 
             LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
             Map<String, LuaObject> map = (Map<String, LuaObject>) luaTela.context.getAttribute("lua");
-            return Lua.newLuaObject(map.get(args[0].getString()));
+            return map.get(args[0].getString());
         }
     },
     getAttrNames() {

@@ -37,3 +37,4 @@ responsePth.path('/redirects').topage()
 local contextPth = path('/context')
 
 contextPth.path('/paths').topage()
+contextPth.path('/attributes').topage()
