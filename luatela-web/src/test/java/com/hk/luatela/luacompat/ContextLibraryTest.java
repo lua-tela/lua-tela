@@ -92,5 +92,39 @@ public class ContextLibraryTest
 
         assertEquals(200, response.getStatusLine().getStatusCode());
         assertEquals(Integer.toString(14000 + start), EntityUtils.toString(response.getEntity()));
+
+        assertNotEquals(0, start);
+
+        request = new HttpGet("/context/attributes/done");
+        response = client.execute(LuaTelaTest.config, request);
+
+        assertEquals(200, response.getStatusLine().getStatusCode());
+        assertEquals("14000", EntityUtils.toString(response.getEntity()));
+    }
+
+    @Test
+    public void testMimeType() throws IOException
+    {
+        HttpGet request;
+        HttpResponse response;
+
+        request = new HttpGet("/context/mime-type");
+        response = client.execute(LuaTelaTest.config, request);
+
+        assertEquals(200, response.getStatusLine().getStatusCode());
+        assertEquals("15000", EntityUtils.toString(response.getEntity()));
+    }
+
+    @Test
+    public void testEscaping() throws IOException
+    {
+        HttpGet request;
+        HttpResponse response;
+
+        request = new HttpGet("/context/escaping");
+        response = client.execute(LuaTelaTest.config, request);
+
+        assertEquals(200, response.getStatusLine().getStatusCode());
+        assertEquals("16000", EntityUtils.toString(response.getEntity()));
     }
 }

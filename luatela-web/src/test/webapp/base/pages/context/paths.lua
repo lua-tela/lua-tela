@@ -1,6 +1,6 @@
 local url = request.path:match("/context/paths(.*)")
 
-assert(url)
+assert(url == '')
 
 assert(context.realPath("WEB-INF"))
 assert(context.realPath("base/pages") == context.dataPath("pages"))

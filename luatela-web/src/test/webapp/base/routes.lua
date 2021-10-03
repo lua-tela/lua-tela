@@ -38,3 +38,5 @@ local contextPth = path('/context')
 
 contextPth.path('/paths').topage()
 contextPth.path('/attributes').topage()
+contextPth.path('/mime-type').topage()
+contextPth.path('/escaping').topage()

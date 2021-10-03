@@ -30,6 +30,8 @@ public class LuaTela
 
 		this.context = context;
 
+		dataRoot = getFile(context, "dataroot", true);
+
 		String resourcePath = context.getInitParameter("resourcepath");
 
 		if(resourcePath != null)
@@ -47,7 +49,6 @@ public class LuaTela
 
 		this.resourcePath = resourcePath;
 
-		dataRoot = getFile(context, "dataroot", true);
 		Path resourceRoot = getFile(context, "resourceroot", false);
 
 		if(resourceRoot == null)

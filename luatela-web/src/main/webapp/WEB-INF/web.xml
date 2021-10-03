@@ -16,28 +16,10 @@
     <servlet-name>MainServlet</servlet-name>
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
-  <context-param>
-    <param-name>dataroot</param-name>
-    <param-value>{{ DATA_ROOT }}</param-value>
-  </context-param>
-  <context-param>
-    <param-name>resourceroot</param-name>
-    <param-value>{{ RESOURCE_ROOT }}</param-value>
-  </context-param>
-  <context-param>
-    <param-name>resourcepath</param-name>
-    <param-value>{{ RESOURCE_PATH }}</param-value>
-  </context-param>
-  <context-param>
-    <param-name>datauser</param-name>
-    <param-value>{{ DATA_USER }}</param-value>
-  </context-param>
-  <context-param>
-    <param-name>datapass</param-name>
-    <param-value>{{ DATA_PASS }}</param-value>
-  </context-param>
-  <context-param>
-    <param-name>dataurl</param-name>
-    <param-value>{{ DATA_URL }}</param-value>
-  </context-param>
+  <context-param><param-name>dataroot</param-name><param-value>{{}}</param-value></context-param>
+  <context-param><param-name>resourceroot</param-name><param-value>{{}}</param-value></context-param>
+  <context-param><param-name>resourcepath</param-name><param-value>{{}}</param-value></context-param>
+  <context-param><param-name>datauser</param-name><param-value>{{}}</param-value></context-param>
+  <context-param><param-name>datapass</param-name><param-value>{{}}</param-value></context-param>
+  <context-param><param-name>dataurl</param-name><param-value>{{}}</param-value></context-param>
 </web-app>

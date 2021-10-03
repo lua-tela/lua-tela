@@ -77,8 +77,6 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
         @Override
         public LuaObject call(LuaInterpreter interp, LuaObject[] args)
         {
-            Lua.checkArgs(toString(), args, LuaType.STRING);
-
             LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
             Map<String, LuaObject> map = (Map<String, LuaObject>) luaTela.context.getAttribute("lua");
             return Lua.newLuaObject(map.keySet());
@@ -90,7 +88,15 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
             super.accept(env, table);
 
             LuaTela luaTela = env.interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
-            luaTela.context.setAttribute("lua", new HashMap<>());
+            Object lua = luaTela.context.getAttribute("lua");
+
+            if(!(lua instanceof HashMap))
+            {
+                if(lua != null)
+                    System.err.println("Unexpected object set in 'lua' attribute '" + lua + "'");
+
+                luaTela.context.setAttribute("lua", new HashMap<>());
+            }
         }
     },
     setAttr() {
@@ -102,7 +108,7 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
             LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
             Map<String, LuaObject> map = (Map<String, LuaObject>) luaTela.context.getAttribute("lua");
             map.put(args[0].getString(), args[1]);
-            return Lua.nil();
+            return args[1];
         }
     },
     removeAttr() {
@@ -141,10 +147,10 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
         {
             Lua.checkArgs(toString(), args, LuaType.STRING);
 
-            String url = interp.getExtra("url", String.class);
+            LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
             try
             {
-                return Lua.newString(url + "/res/" + URLEncoder.encode(args[0].getString(), "UTF-8"));
+                return Lua.newString("/" + luaTela.resourcePath + "/" + URLEncoder.encode(args[0].getString(), "UTF-8"));
             }
             catch (UnsupportedEncodingException ex)
             {
@@ -182,7 +188,7 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
             }
         }
     };
-    
+
     @Override
     public LuaObject call(LuaInterpreter interp, LuaObject[] args)
     {

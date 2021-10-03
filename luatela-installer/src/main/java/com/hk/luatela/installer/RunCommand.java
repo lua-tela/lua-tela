@@ -6,24 +6,15 @@ import com.hk.str.HTMLText;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.*;
-import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.webapp.WebInfConfiguration;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletContextListener;
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -42,6 +33,9 @@ class RunCommand
 			tempDir = Files.createTempDirectory("luatela");
 
 			InputStream stream = RunCommand.class.getResourceAsStream("/luatela.war");
+			if(stream == null)
+				throw new NullPointerException();
+
 			ZipInputStream jarStream = new ZipInputStream(stream);
 
 			ZipEntry e;
@@ -50,16 +44,49 @@ class RunCommand
 			{
 				Path newPath = tempDir.resolve(e.getName());
 
-				newPath.getParent().toFile().mkdirs();
-
-				OutputStream newStream = Files.newOutputStream(newPath);
-				IOUtil.copyTo(jarStream, newStream, 8192);
-				newStream.close();
+				if(!e.isDirectory())
+				{
+					Files.createDirectories(newPath.getParent());
+					OutputStream newStream = Files.newOutputStream(newPath);
+					IOUtil.copyTo(jarStream, newStream, 8192);
+					newStream.close();
+				}
+				else
+					Files.createDirectories(newPath);
 
 				jarStream.closeEntry();
 			}
 
 			jarStream.close();
+
+			Path webXml = tempDir.resolve("WEB-INF/web.xml");
+			Path tempXml = tempDir.resolve("WEB-INF/temp.xml");
+
+			Pattern pattern = Pattern.compile(".*<param-name>([a-zA-Z_]+)</param-name>.*\\{\\{}}.*");
+			BufferedReader reader = Files.newBufferedReader(webXml);
+			BufferedWriter writer = Files.newBufferedWriter(tempXml);
+			String line;
+			while((line = reader.readLine()) != null)
+			{
+				Matcher matcher = pattern.matcher(line);
+				if(matcher.matches())
+				{
+					String param = Installer.getParam(arguments, "--" + matcher.group(1));
+
+					if(param == null)
+						line = "";
+					else
+						line = line.replace("{{}}", param);
+				}
+
+				if(!line.trim().isEmpty())
+					writer.append(line).append('\n');
+			}
+			reader.close();
+			writer.close();
+
+			Files.delete(webXml);
+			Files.move(tempXml, webXml);
 
 			Server server = new Server();
 
@@ -67,14 +94,12 @@ class RunCommand
 			connector.setPort(8080);
 			server.setConnectors(new Connector[] { connector });
 
-			WebAppContext context = new WebAppContext();
-			context.setWar(tempDir.toString());
+			WebAppContext context = new WebAppContext(tempDir.toString(), "/");
 
-			context.setConfigurations(new Configuration[] { new WebInfConfiguration() });
+			server.setHandler(context);
 
 			server.start();
 
-			String line;
 			while(true)
 			{
 				line = in.nextLine();
