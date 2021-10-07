@@ -4,6 +4,7 @@ import com.hk.luatela.patch.models.Model;
 import com.hk.luatela.patch.models.ModelSet;
 import com.hk.luatela.patch.models.fields.DataField;
 import com.hk.luatela.patch.models.fields.FloatField;
+import com.hk.luatela.patch.models.fields.IDField;
 import com.hk.luatela.patch.models.fields.StringField;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,12 +74,25 @@ public class LuaBaseTest
 		Map<String, DataField> fieldMap = model.getFieldMap();
 		assertNotNull(fieldMap);
 
-		assertEquals(5, fieldMap.size());
+		assertEquals(5 + 1, fieldMap.size());
 
 		assertTrue(fieldMap.get("firstName") instanceof StringField);
+		assertEquals(64, ((StringField) fieldMap.get("firstName")).getMaxLength());
+
 		assertTrue(fieldMap.get("lastName") instanceof StringField);
+		assertEquals(64, ((StringField) fieldMap.get("lastName")).getMaxLength());
+
 		assertTrue(fieldMap.get("mathicsGrade") instanceof FloatField);
 		assertTrue(fieldMap.get("scienceGrade") instanceof FloatField);
 		assertTrue(fieldMap.get("englishGrade") instanceof FloatField);
+
+		assertTrue(fieldMap.get("id") instanceof IDField);
+
+		assertTrue(fieldMap.get("id").isPrimary());
+		assertFalse(fieldMap.get("firstName").isPrimary());
+		assertFalse(fieldMap.get("lastName").isPrimary());
+		assertFalse(fieldMap.get("mathicsGrade").isPrimary());
+		assertFalse(fieldMap.get("scienceGrade").isPrimary());
+		assertFalse(fieldMap.get("englishGrade").isPrimary());
 	}
 }

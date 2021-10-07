@@ -6,6 +6,7 @@ import com.hk.lua.LuaInterpreter;
 import com.hk.lua.LuaLibrary;
 import com.hk.luatela.patch.models.ModelLibrary;
 import com.hk.luatela.patch.models.ModelSet;
+import com.hk.luatela.patch.models.PatchComparison;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,7 +16,7 @@ public class LuaBase
 {
 	private final File dataroot;
 	private Connection connection;
-	private ModelSet modelSet;
+	private ModelSet patchModelSet, modelSet;
 
 	public LuaBase(File dataroot) throws FileNotFoundException
 	{
@@ -32,6 +33,10 @@ public class LuaBase
 
 	public void loadPatches()
 	{
+		if(patchModelSet != null)
+			throw new IllegalStateException("Already loaded patchy model set");
+
+		patchModelSet = new ModelSet();
 		File patchesDir = new File(dataroot, ".patches");
 
 		if(!patchesDir.exists())
@@ -47,7 +52,7 @@ public class LuaBase
 			// one by one, apply patches to fresh model set
 			// compare to newly read model set, and recreate patch
 			for(File patch : patches)
-				System.out.println("Patch exists: " + patch + ", " + modelSet);
+				throw new Error("APPLY PATCHES TOGETHER");
 		}
 	}
 
@@ -78,10 +83,9 @@ public class LuaBase
 
 		interp.execute();
 
-		if(this.modelSet == null)
-			this.modelSet = modelSet;
-		else
-			throw new Error("COMPARE MODEL SETS");
+		this.modelSet = modelSet;
+
+		PatchComparison comparison = new PatchComparison(patchModelSet, modelSet);
 	}
 
 	public ModelSet getModelSet()

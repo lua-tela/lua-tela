@@ -4,8 +4,6 @@ import com.hk.lua.LuaException;
 import com.hk.lua.LuaObject;
 import com.hk.luatela.patch.models.Model;
 
-import java.util.Map;
-
 public class StringField extends DataField
 {
 	private int length;
@@ -18,24 +16,27 @@ public class StringField extends DataField
 	@Override
 	DataField accept(LuaObject properties)
 	{
-		for(Map.Entry<LuaObject, LuaObject> entry : properties.getEntries())
-		{
-			if(!entry.getKey().isString())
-				throw new LuaException("unexpected non-string field property '" + entry.getKey().name() + "'");
+		LuaObject length = properties.rawGet("length");
 
-			if ("length".equals(entry.getKey().getString())) {
-				length = (int) entry.getValue().getInteger();
-			} else {
-				throw new LuaException("unexpected field property '" + entry.getKey().getString() + "'");
-			}
+		if(!length.isNil())
+		{
+			if(!length.isInteger())
+				throw new LuaException("expected length of field '" + name + "' to be an integer");
+
+			this.length = (int) length.getInteger();
 		}
 
-		return this;
+		return super.accept(properties);
 	}
 
 	@Override
 	public String name()
 	{
 		return "*FIELD_STRING";
+	}
+
+	public int getMaxLength()
+	{
+		return length;
 	}
 }

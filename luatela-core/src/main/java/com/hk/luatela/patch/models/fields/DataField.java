@@ -8,10 +8,11 @@ import com.hk.luatela.patch.models.Model;
 
 import java.util.function.BiFunction;
 
-public abstract class DataField extends LuaUserdata
+public abstract class DataField extends LuaUserdata implements Comparable<DataField>
 {
 	public final Model parent;
 	public final String name;
+	boolean primary;
 
 	DataField(Model parent, String name)
 	{
@@ -19,7 +20,14 @@ public abstract class DataField extends LuaUserdata
 		this.name = name;
 	}
 
-	abstract DataField accept(LuaObject properties);
+	DataField accept(LuaObject properties)
+	{
+		LuaObject primary = properties.rawGet("primary");
+		if(!primary.isNil())
+			this.primary = primary.getBoolean();
+
+		return this;
+	}
 
 	@Override
 	public DataField getUserdata()
@@ -31,6 +39,17 @@ public abstract class DataField extends LuaUserdata
 	public String getString(LuaInterpreter interp)
 	{
 		return name;
+	}
+
+	public boolean isPrimary()
+	{
+		return primary;
+	}
+
+	@Override
+	public int compareTo(DataField o)
+	{
+		return Boolean.compare(primary, o.primary);
 	}
 
 	public static class Builder extends LuaUserdata

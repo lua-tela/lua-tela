@@ -3,9 +3,7 @@ package com.hk.luatela.patch.models;
 import com.hk.func.BiConsumer;
 import com.hk.lua.*;
 import com.hk.luatela.patch.DatabaseException;
-import com.hk.luatela.patch.models.fields.DataField;
-import com.hk.luatela.patch.models.fields.FloatField;
-import com.hk.luatela.patch.models.fields.StringField;
+import com.hk.luatela.patch.models.fields.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -83,5 +81,7 @@ public enum ModelLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaM
 	{
 		fields.put("string", builder("string", StringField::new));
 		fields.put("float", builder("float", FloatField::new));
+		fields.put("integer", builder("integer", IntegerField::new));
+		fields.put("id", builder("id", IDField::new));
 	}
 }

@@ -6,30 +6,35 @@ import com.hk.lua.LuaObject;
 import com.hk.lua.LuaUserdata;
 import com.hk.luatela.patch.DatabaseException;
 import com.hk.luatela.patch.models.fields.DataField;
+import com.hk.luatela.patch.models.fields.IDField;
 
 import javax.xml.crypto.Data;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class Model extends LuaUserdata
 {
 	public final String name;
 	private final Map<String, DataField> fieldMap;
+	private List<DataField> fields;
 
 	public Model(ModelSet set, String name) throws DatabaseException
 	{
 		this.name = name;
-		fieldMap = new HashMap<>();
+		fieldMap = new LinkedHashMap<>();
 
 		set.addModel(this);
 	}
 
 	void readFields(LuaObject object) throws DatabaseException
 	{
-		if(!fieldMap.isEmpty())
+		if(fields != null)
 			throw new DatabaseException("Unexpected call to read fields, already contains fields");
 
 		Set<Map.Entry<LuaObject, LuaObject>> entries = object.getEntries();
 
+		LinkedList<DataField> fields = new LinkedList<>();
+		boolean hasPrimary = false;
 		for(Map.Entry<LuaObject, LuaObject> entry : entries)
 		{
 			LuaObject key = entry.getKey();
@@ -49,13 +54,43 @@ public class Model extends LuaUserdata
 			value.rawSet("__builder", Lua.nil());
 			DataField field = builder.provide(this, name, value);
 
+			if(field.isPrimary())
+				hasPrimary = true;
+
+			fields.add(field);
+
 			fieldMap.put(name, field);
 		}
+
+		if(hasPrimary)
+			Collections.sort(fields);
+		else
+		{
+			IDField idField = new IDField(this, "id", true);
+			fieldMap.put(idField.name, idField);
+			fields.addFirst(idField);
+		}
+
+		this.fields = fields;
 	}
 
 	public Map<String, DataField> getFieldMap()
 	{
 		return Collections.unmodifiableMap(fieldMap);
+	}
+
+	public List<DataField> getFields()
+	{
+		return Collections.unmodifiableList(fields);
+	}
+
+	public void iterateFields(Predicate<DataField> predicate)
+	{
+		for(DataField field : fields)
+		{
+			if(predicate.test(field))
+				break;
+		}
 	}
 
 	@Override

@@ -1,11 +1,10 @@
 package com.hk.luatela.patch.models.fields;
 
-import com.hk.lua.LuaObject;
 import com.hk.luatela.patch.models.Model;
 
-public class FloatField extends DataField
+public class IntegerField extends DataField
 {
-	public FloatField(Model parent, String name)
+	public IntegerField(Model parent, String name)
 	{
 		super(parent, name);
 	}
@@ -13,6 +12,6 @@ public class FloatField extends DataField
 	@Override
 	public String name()
 	{
-		return "*FIELD_FLOAT";
+		return "*FIELD_INTEGER";
 	}
 }
