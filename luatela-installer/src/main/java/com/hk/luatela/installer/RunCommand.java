@@ -12,22 +12,21 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static com.hk.luatela.installer.Installer.splitToLinesByLen;
 
-class RunCommand
+class RunCommand extends Installer.Command
 {
-	private final Scanner in;
+	private Server server;
+	private Path tempDir;
 
-	RunCommand(Scanner in, LinkedList<String> arguments)
+	void execute(LinkedList<String> arguments)
 	{
-		this.in = in;
-		Path tempDir = null;
 		try
 		{
 			tempDir = Files.createTempDirectory("luatela");
@@ -88,7 +87,19 @@ class RunCommand
 			Files.delete(webXml);
 			Files.move(tempXml, webXml);
 
-			Server server = new Server();
+			File libDir = tempDir.resolve("WEB-INF/lib").toFile();
+			File[] fs = libDir.listFiles();
+			String name;
+			for(File f : fs)
+			{
+				name = f.getName();
+				if(name.matches("luatela-core.*\\.jar") ||
+						name.matches("hklib.*\\.jar") ||
+						name.matches("mysql-connector-java.*\\.jar"))
+					f.renameTo(new File(libDir, name + ".tmp"));
+			}
+
+			this.server = new Server();
 
 			ServerConnector connector = new ServerConnector(server);
 			connector.setPort(8080);
@@ -109,21 +120,32 @@ class RunCommand
 
 				System.out.println("Type 'stop' to stop the server");
 			}
-
-			server.stop();
 		}
 		catch (Exception e)
 		{
 			throw new RuntimeException(e);
 		}
-		finally
-		{
-			if(tempDir != null)
-				FileUtil.deleteDirectory(tempDir.toFile());
-		}
 	}
 
-	static void help()
+	@Override
+	void close()
+	{
+		if(server != null && server.isRunning())
+		{
+			try
+			{
+				server.stop();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		if(tempDir != null)
+			FileUtil.deleteDirectory(tempDir.toFile());
+	}
+
+	void help()
 	{
 		HTMLText txt = new HTMLText();
 

@@ -14,7 +14,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>MainServlet</servlet-name>
-    <url-pattern>/*</url-pattern>
+    <url-pattern>/</url-pattern>
   </servlet-mapping>
   <context-param><param-name>dataroot</param-name><param-value>{{}}</param-value></context-param>
   <context-param><param-name>resourceroot</param-name><param-value>{{}}</param-value></context-param>

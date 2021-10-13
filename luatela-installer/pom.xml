@@ -86,7 +86,7 @@
         <version>3.0.0</version>
         <executions>
           <execution>
-            <id>download-tomcat-8.5.70</id>
+            <id>download-tomcat-8.5</id>
             <phase>generate-resources</phase>
             <goals>
               <goal>run</goal>

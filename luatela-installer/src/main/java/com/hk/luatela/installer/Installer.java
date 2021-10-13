@@ -2,32 +2,13 @@ package com.hk.luatela.installer;
 
 import java.text.DateFormat;
 import java.util.*;
+import java.util.function.Supplier;
 
 public class Installer
 {
-	private static void help(LinkedList<String> arguments)
-	{
-		if(arguments == null || arguments.size() == 0)
-		{
-			System.out.println("Available commands:");
+	private static Command currentCommand;
 
-			for (String command : commands.keySet())
-				System.out.println("\t" + command);
-		}
-		else
-		{
-			String command = arguments.removeFirst();
-
-			Command cmd = commands.get(command);
-
-			if(cmd != null)
-				cmd.execute(null);
-			else
-				unknownCommand(command);
-		}
-	}
-
-	public static void main(String[] args)
+	private static void intro()
 	{
 		System.out.println("--[===========================[ LUA-TELA ]===========================]");
 		System.out.println("Lua-Tela Web Framework (the power within)");
@@ -37,21 +18,33 @@ public class Installer
 		System.out.println();
 		System.out.print("Date: ");
 		System.out.println(FULL_FORMAT.format(new Date()));
+	}
+
+	public static void main(String[] args)
+	{
+		Runtime.getRuntime().addShutdownHook(new Thread(Installer::close));
 
 		in = new Scanner(System.in);
 		if(args != null && args.length > 0)
 		{
+			intro();
 			System.out.println();
 			System.out.println("cmd: " + String.join(" ", args));
-			Command command = commands.get(args[0]);
+			Supplier<Command> supplier = commands.get(args[0]);
 
-			if(command != null)
-				command.execute(new LinkedList<>(Arrays.asList(Arrays.copyOfRange(args, 1, args.length))));
+			if(supplier != null)
+			{
+				currentCommand = supplier.get();
+				currentCommand.execute(new LinkedList<>(Arrays.asList(Arrays.copyOfRange(args, 1, args.length))));
+				currentCommand.close();
+				currentCommand = null;
+			}
 			else
 				unknownCommand(args[0]);
 		}
 		else
 		{
+			intro();
 			System.out.println("Type help or a command...");
 			System.out.println();
 
@@ -143,12 +136,23 @@ public class Installer
 
 		command = arguments.removeFirst();
 
-		Command cmd = commands.get(command);
+		Supplier<Command> supplier = commands.get(command);
 
-		if(cmd != null)
-			cmd.execute(arguments);
+		if(supplier != null)
+		{
+			currentCommand = supplier.get();
+			currentCommand.execute(arguments);
+			currentCommand.close();
+			currentCommand = null;
+		}
 		else
 			unknownCommand(command);
+	}
+
+	private static void close()
+	{
+		if(currentCommand != null)
+			currentCommand.close();
 	}
 
 	private static void unknownCommand(String command)
@@ -231,22 +235,68 @@ public class Installer
 	}
 
 	private static Scanner in;
-	private static final Map<String, Command> commands = new TreeMap<>();
+	private static final Map<String, Supplier<Command>> commands = new TreeMap<>();
 	public static final DateFormat FULL_FORMAT = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL);
 
 	static
 	{
-		commands.put("help", Installer::help);
-		commands.put("run", arguments -> {
-			if(arguments == null)
-				RunCommand.help();
-			else
-				new RunCommand(in, arguments);
-		});
+		commands.put("help", HelpCommand::new);
+		commands.put("run", RunCommand::new);
+		commands.put("patch-compare", PatchCompareCommand::new);
 	}
 
-	interface Command
+	private static class HelpCommand extends Command
 	{
-		void execute(LinkedList<String> arguments);
+		@Override
+		void execute(LinkedList<String> arguments)
+		{
+			if (arguments != null && arguments.size() != 0)
+			{
+				String command = arguments.removeFirst();
+
+				Supplier<Command> supplier = commands.get(command);
+
+				if(supplier != null)
+				{
+					Command prev = currentCommand;
+					currentCommand = supplier.get();
+					currentCommand.help();
+					currentCommand = prev;
+				}
+				else
+					unknownCommand(command);
+			}
+			else
+				help();
+		}
+
+		@Override
+		void help()
+		{
+			System.out.println("Available commands:");
+
+			for (String command : commands.keySet())
+				System.out.println("\t" + command);
+			System.out.println("\texit/close");
+		}
+
+		@Override
+		public void close() {}
+	}
+
+	static abstract class Command
+	{
+		protected final Scanner in;
+
+		Command()
+		{
+			this.in = Installer.in;
+		}
+
+		abstract void execute(LinkedList<String> arguments);
+
+		abstract void help();
+
+		void close() {}
 	}
 }

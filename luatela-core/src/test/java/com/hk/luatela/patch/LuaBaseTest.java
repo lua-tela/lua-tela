@@ -39,7 +39,7 @@ public class LuaBaseTest
 		if(patches.exists())
 			assertTrue(patches.delete());
 
-		base.loadPatches();
+		assertEquals(0, base.loadPatches());
 
 		assertTrue(patches.exists());
 		assertTrue(patches.delete());
@@ -61,8 +61,9 @@ public class LuaBaseTest
 		File dataroot = new File(root, "just-models");
 
 		LuaBase base = new LuaBase(dataroot);
-		base.loadPatches();
-		base.checkNew();
+		assertEquals(0, base.loadPatches());
+		PatchComparison comparison = base.checkNew();
+		assertNotNull(comparison);
 
 		ModelSet modelSet = base.getModelSet();
 		assertNotNull(modelSet);
@@ -76,6 +77,8 @@ public class LuaBaseTest
 
 		assertEquals(5 + 1, fieldMap.size());
 
+		assertTrue(fieldMap.get("id") instanceof IDField);
+
 		assertTrue(fieldMap.get("firstName") instanceof StringField);
 		assertEquals(64, ((StringField) fieldMap.get("firstName")).getMaxLength());
 
@@ -86,13 +89,13 @@ public class LuaBaseTest
 		assertTrue(fieldMap.get("scienceGrade") instanceof FloatField);
 		assertTrue(fieldMap.get("englishGrade") instanceof FloatField);
 
-		assertTrue(fieldMap.get("id") instanceof IDField);
-
 		assertTrue(fieldMap.get("id").isPrimary());
 		assertFalse(fieldMap.get("firstName").isPrimary());
 		assertFalse(fieldMap.get("lastName").isPrimary());
 		assertFalse(fieldMap.get("mathicsGrade").isPrimary());
 		assertFalse(fieldMap.get("scienceGrade").isPrimary());
 		assertFalse(fieldMap.get("englishGrade").isPrimary());
+
+		assertTrue(new File(dataroot, ".patches").delete());
 	}
 }

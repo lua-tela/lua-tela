@@ -23,7 +23,7 @@ public class Routes
 	{
 		this.luaTela = luaTela;
 		if(!Files.exists(routesPath))
-			throw new InitializationException("'routes.lua' not found in data root directory");
+			throw new InitializationException("'routes.lua' not found in data root directory (" + routesPath.getParent() + ")");
 
 		LuaInterpreter interp;
 		try

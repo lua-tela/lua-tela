@@ -38,9 +38,9 @@
   </dependencies>
 
   <modules>
+    <module>luatela-core</module>
     <module>luatela-web</module>
     <module>luatela-installer</module>
-    <module>luatela-core</module>
   </modules>
 
   <build>
