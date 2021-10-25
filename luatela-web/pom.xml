@@ -89,7 +89,7 @@
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <webApp>
-            <contextPath>/*</contextPath>
+            <contextPath>/</contextPath>
             <descriptor>${basedir}\src\main\webapp\WEB-INF\temp.xml</descriptor>
           </webApp>
           <stopKey>thekayani</stopKey>
@@ -107,7 +107,7 @@
               <webAppSourceDirectory>${project.basedir}/src/test/webapp</webAppSourceDirectory>
               <scanIntervalSeconds>10</scanIntervalSeconds>
               <webApp>
-                <contextPath>/*</contextPath>
+                <contextPath>/</contextPath>
                 <descriptor>${basedir}\src\test\webapp\WEB-INF\web.xml</descriptor>
               </webApp>
             </configuration>
