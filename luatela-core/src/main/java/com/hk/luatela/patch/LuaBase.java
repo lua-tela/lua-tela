@@ -9,6 +9,7 @@ import com.hk.luatela.patch.models.ModelSet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Files;
 import java.sql.Connection;
 
 public class LuaBase
@@ -54,7 +55,7 @@ public class LuaBase
 				throw new Error("APPLY PATCHES TOGETHER");
 		}
 
-		return patches.length;
+		return patches != null ? patches.length : 0;
 	}
 
 	public PatchComparison checkNew() throws FileNotFoundException, DatabaseException
@@ -64,9 +65,13 @@ public class LuaBase
 		if(!models.exists())
 			throw new FileNotFoundException(models.getAbsolutePath() + " (models.lua required for db)");
 
+		return new PatchComparison(patchModelSet, modelSet = loadModelSet(models));
+	}
+
+	static ModelSet importModelSet(ModelSet modelSet, File models) throws FileNotFoundException, DatabaseException
+	{
 		LuaInterpreter interp = Lua.reader(models);
 
-		ModelSet modelSet = new ModelSet();
 		interp.setExtra(ModelSet.KEY, modelSet);
 
 		LuaLibrary.importStandard(interp);
@@ -79,12 +84,17 @@ public class LuaBase
 		}
 		catch(LuaException ex)
 		{
-			throw new DatabaseException("during models.lua compilation", ex);
+			throw new DatabaseException("during " + models.getName() + " compilation", ex);
 		}
 
 		interp.execute();
 
-		return new PatchComparison(patchModelSet, this.modelSet = modelSet);
+		return modelSet;
+	}
+
+	static ModelSet loadModelSet(File models) throws FileNotFoundException, DatabaseException
+	{
+		return importModelSet(new ModelSet(), models);
 	}
 
 	public ModelSet getModelSet()

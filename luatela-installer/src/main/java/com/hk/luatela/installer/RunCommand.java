@@ -30,6 +30,14 @@ class RunCommand extends Installer.Command
 
 	void execute(LinkedList<String> arguments)
 	{
+		String dataroot = Installer.getParam(arguments, "--dataroot");
+
+		if(dataroot == null)
+		{
+			arguments.addLast("--dataroot");
+			arguments.addLast("abs:" + System.getProperty("user.dir") + File.separator + "base");
+		}
+
 		try
 		{
 			tempDir = Files.createTempDirectory("luatela");
@@ -232,9 +240,10 @@ class RunCommand extends Installer.Command
 		txt.prln("--dataroot [data root directory]").tabUp();
 		str = "This parameter should point to the 'dataroot' " +
 				"directory, which contains the route and model info.\n" +
-				"By default, if not provided, it will point to the " +
-				"current working directory. This folder important and " +
-				"required for Lua Tela to properly initialize.";
+				"By default, if not provided, it will point to the 'base' " +
+				"folder in the current working directory. " +
+				"This folder important and required for Lua " +
+				"Tela to properly initialize.";
 		for(String line : splitToLinesByLen(str, 50))
 			txt.prln(line);
 		txt.tabDown();

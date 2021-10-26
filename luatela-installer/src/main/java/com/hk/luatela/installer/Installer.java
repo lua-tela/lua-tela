@@ -234,6 +234,21 @@ public class Installer
 		return null;
 	}
 
+	static boolean getFlag(LinkedList<String> arguments, String param)
+	{
+		Iterator<String> itr = arguments.iterator();
+
+		while(itr.hasNext())
+		{
+			if(itr.next().equals(param))
+			{
+				itr.remove();
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private static Scanner in;
 	private static final Map<String, Supplier<Command>> commands = new TreeMap<>();
 	public static final DateFormat FULL_FORMAT = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL);
@@ -242,6 +257,7 @@ public class Installer
 	{
 		commands.put("help", HelpCommand::new);
 		commands.put("run", RunCommand::new);
+		commands.put("print-out", PrintOutCommand::new);
 		commands.put("patch-compare", PatchCompareCommand::new);
 	}
 
@@ -250,7 +266,7 @@ public class Installer
 		@Override
 		void execute(LinkedList<String> arguments)
 		{
-			if (arguments != null && arguments.size() != 0)
+			if(arguments != null && arguments.size() != 0)
 			{
 				String command = arguments.removeFirst();
 
@@ -273,6 +289,27 @@ public class Installer
 		@Override
 		void help()
 		{
+			System.out.println("To get information about a certain command");
+			System.out.println("you can run 'help [command]' for more");
+			System.out.println("information about the specific command.");
+			System.out.println();
+			for(String str : splitToLinesByLen(
+						"Parameters with two dashes usually " +
+							"expect some type of value after it " +
+							"whereas parameters with one dash should " +
+							"indicate that it is just a boolean value, " +
+							"meaning it should be included or not. " +
+							"Used as a flag to signal whether " +
+							"something should, or shouldn't, occur. " +
+							"One dash parameters are specified as " +
+							"flags in various places in this program.", 75))
+				System.out.println(str);
+			System.out.println("Here's some examples: (don't exist, just examples)");
+			System.out.println(" $ print -json");
+			System.out.println("// This signals to print in JSON format");
+			System.out.println(" $ print --file 'my path'");
+			System.out.println("// This indicates WHERE to print");
+			System.out.println();
 			System.out.println("Available commands:");
 
 			for (String command : commands.keySet())

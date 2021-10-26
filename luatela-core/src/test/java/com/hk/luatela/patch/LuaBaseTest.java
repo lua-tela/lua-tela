@@ -28,7 +28,7 @@ public class LuaBaseTest
 	@Test
 	public void testEmpty() throws FileNotFoundException, DatabaseException
 	{
-		File dataroot = new File(root, "empty-base");
+		File dataroot = new File(root, "base-empty");
 		File patches = new File(dataroot, ".patches");
 
 		if(!dataroot.exists())
@@ -58,12 +58,19 @@ public class LuaBaseTest
 	@Test
 	public void testJustModels() throws FileNotFoundException, DatabaseException
 	{
-		File dataroot = new File(root, "just-models");
+		File dataroot = new File(root, "base-just-model");
 
 		LuaBase base = new LuaBase(dataroot);
 		assertEquals(0, base.loadPatches());
 		PatchComparison comparison = base.checkNew();
 		assertNotNull(comparison);
+		assertNull(comparison.attemptCompare());
+		assertFalse(comparison.unchanged);
+
+		assertNotNull(comparison.newModels);
+		assertEquals(1, comparison.newModels.length);
+		assertEquals("student_grade", comparison.newModels[0].name);
+		assertEquals(5 + 1, comparison.newModels[0].getFields().size());
 
 		ModelSet modelSet = base.getModelSet();
 		assertNotNull(modelSet);
