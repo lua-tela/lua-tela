@@ -13,6 +13,7 @@ import javax.servlet.ServletRegistration;
 import java.io.File;
 import java.io.PrintStream;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -101,6 +102,15 @@ public class LuaTela
 		}
 		else
 		{
+			try
+			{
+				Path fullPath = Paths.get(string);
+				if (Files.exists(fullPath))
+					return fullPath;
+			}
+			catch (InvalidPathException ignored)
+			{}
+
 			int idx = string.indexOf(':');
 			if (idx <= 0 || idx == string.length() - 1)
 				throw new InitializationException(name + " must be in '[type]:[path]' format.");

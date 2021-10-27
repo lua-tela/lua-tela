@@ -22,13 +22,12 @@ public class PatchComparisonTest
 	@Test
 	public void testEmptyToSingle() throws FileNotFoundException, DatabaseException
 	{
-		ModelSet emptySet, notEmptySet;
+		ModelSet notEmptySet;
 		PatchComparison comparison;
 
-		emptySet = new ModelSet();
 		notEmptySet = LuaBase.loadModelSet(new File(modelDir, "student_grade.lua"));
 
-		comparison = new PatchComparison(emptySet, notEmptySet);
+		comparison = new PatchComparison(wrap(new ModelSet()), notEmptySet);
 
 		assertNull(comparison.attemptCompare());
 		assertFalse(comparison.unchanged);
@@ -38,10 +37,9 @@ public class PatchComparisonTest
 		assertEquals("student_grade", comparison.newModels[0].name);
 		assertEquals(6, comparison.newModels[0].getFields().size());
 
-		emptySet = new ModelSet();
 		notEmptySet = LuaBase.loadModelSet(new File(modelDir, "single_model.lua"));
 
-		comparison = new PatchComparison(emptySet, notEmptySet);
+		comparison = new PatchComparison(wrap(new ModelSet()), notEmptySet);
 
 		assertNull(comparison.attemptCompare());
 		assertFalse(comparison.unchanged);
@@ -52,16 +50,30 @@ public class PatchComparisonTest
 		assertEquals(3, comparison.newModels[0].getFields().size());
 	}
 
+	private LuaBase wrap(ModelSet set)
+	{
+		try
+		{
+			LuaBase base = new LuaBase(modelDir);
+			base.patchModelSet = set;
+			return base;
+		}
+		catch (FileNotFoundException e)
+		{
+			fail(e.getLocalizedMessage());
+			return null;
+		}
+	}
+
 	@Test
 	public void testEmptyToMultiple() throws FileNotFoundException, DatabaseException
 	{
-		ModelSet emptySet, notEmptySet;
+		ModelSet notEmptySet;
 		PatchComparison comparison;
 
-		emptySet = new ModelSet();
 		notEmptySet = LuaBase.loadModelSet(new File(modelDir, "test_models.lua"));
 
-		comparison = new PatchComparison(emptySet, notEmptySet);
+		comparison = new PatchComparison(wrap(new ModelSet()), notEmptySet);
 
 		assertNull(comparison.attemptCompare());
 		assertFalse(comparison.unchanged);

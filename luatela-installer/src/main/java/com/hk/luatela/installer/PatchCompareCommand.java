@@ -1,17 +1,18 @@
 package com.hk.luatela.installer;
 
+import com.hk.luatela.patch.PatchComparison;
 import com.hk.str.HTMLText;
-
-import java.util.LinkedList;
 
 import static com.hk.luatela.installer.Installer.splitToLinesByLen;
 
-public class PatchCompareCommand extends Installer.Command
+public class PatchCompareCommand extends PatchCommand
 {
 	@Override
-	void execute(LinkedList<String> arguments)
+	void doCompare(PatchComparison comparison)
 	{
+		super.doCompare(comparison);
 
+		comparison.printSummary(System.out);
 	}
 
 	@Override
@@ -28,9 +29,10 @@ public class PatchCompareCommand extends Installer.Command
 		txt.prln("--dataroot [data root directory]").tabUp();
 		str = "This parameter should point to the 'dataroot' " +
 				"directory, which contains the route and model info.\n" +
-				"By default, if not provided, it will point to the " +
-				"current working directory. This folder important and " +
-				"required for Lua Tela to properly initialize.";
+				"By default, if not provided, it will point to the 'base' " +
+				"folder in the current working directory. " +
+				"This folder is important and required for Lua " +
+				"Tela to properly initialize.";
 		for(String line : splitToLinesByLen(str, 50))
 			txt.prln(line);
 		txt.tabDown();

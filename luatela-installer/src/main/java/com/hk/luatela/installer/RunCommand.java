@@ -35,7 +35,7 @@ class RunCommand extends Installer.Command
 		if(dataroot == null)
 		{
 			arguments.addLast("--dataroot");
-			arguments.addLast("abs:" + System.getProperty("user.dir") + File.separator + "base");
+			arguments.addLast("rel:base");
 		}
 
 		try
@@ -242,7 +242,7 @@ class RunCommand extends Installer.Command
 				"directory, which contains the route and model info.\n" +
 				"By default, if not provided, it will point to the 'base' " +
 				"folder in the current working directory. " +
-				"This folder important and required for Lua " +
+				"This folder is important and required for Lua " +
 				"Tela to properly initialize.";
 		for(String line : splitToLinesByLen(str, 50))
 			txt.prln(line);

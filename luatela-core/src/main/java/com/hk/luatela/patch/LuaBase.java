@@ -16,7 +16,8 @@ public class LuaBase
 {
 	private final File dataroot;
 	private Connection connection;
-	private ModelSet patchModelSet, modelSet;
+	ModelSet patchModelSet;
+	private ModelSet modelSet;
 
 	public LuaBase(File dataroot) throws FileNotFoundException
 	{
@@ -65,7 +66,7 @@ public class LuaBase
 		if(!models.exists())
 			throw new FileNotFoundException(models.getAbsolutePath() + " (models.lua required for db)");
 
-		return new PatchComparison(patchModelSet, modelSet = loadModelSet(models));
+		return new PatchComparison(this, modelSet = loadModelSet(models));
 	}
 
 	static ModelSet importModelSet(ModelSet modelSet, File models) throws FileNotFoundException, DatabaseException
