@@ -259,6 +259,7 @@ public class Installer
 		commands.put("run", RunCommand::new);
 		commands.put("print-out", PrintOutCommand::new);
 		commands.put("patch-compare", PatchCompareCommand::new);
+		commands.put("patch-up", PatchUpCommand::new);
 	}
 
 	private static class HelpCommand extends Command
@@ -302,7 +303,7 @@ public class Installer
 							"Used as a flag to signal whether " +
 							"something should, or shouldn't, occur. " +
 							"One dash parameters are specified as " +
-							"flags in various places in this program.", 75))
+							"flags in various places in this program.", 60))
 				System.out.println(str);
 			System.out.println("Here's some examples: (don't exist, just examples)");
 			System.out.println(" $ print -json");

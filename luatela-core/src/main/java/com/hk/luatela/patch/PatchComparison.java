@@ -47,18 +47,17 @@ public class PatchComparison
 
 	public void printSummary(PrintStream out)
 	{
-		if(unchanged)
-		{
-			out.println("Model Set unchanged");
-			return;
-		}
-
 		if(newModels != null && newModels.length > 0)
 		{
 			out.println("Found " + newModels.length + " new model" + (newModels.length == 1 ? "" : "s"));
 			for (Model newModel : newModels)
 				out.println(newModel.name);
 		}
+	}
+
+	public PatchExport export()
+	{
+		return new PatchExport(base, this);
 	}
 
 	public interface Decision

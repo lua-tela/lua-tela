@@ -14,7 +14,7 @@ import java.sql.Connection;
 
 public class LuaBase
 {
-	private final File dataroot;
+	public final File dataroot;
 	private Connection connection;
 	ModelSet patchModelSet;
 	private ModelSet modelSet;

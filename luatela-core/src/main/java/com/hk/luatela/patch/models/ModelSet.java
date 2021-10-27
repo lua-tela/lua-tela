@@ -1,5 +1,6 @@
 package com.hk.luatela.patch.models;
 
+import com.hk.lua.LuaInterpreter;
 import com.hk.luatela.patch.DatabaseException;
 
 import java.util.HashMap;
@@ -9,10 +10,12 @@ import java.util.Map;
 public class ModelSet implements Iterable<Model>
 {
 	private final Map<String, Model> models;
+	private int patchCount;
 
 	public ModelSet()
 	{
 		models = new HashMap<>();
+		patchCount = -1;
 	}
 
 	public int size()
@@ -33,7 +36,21 @@ public class ModelSet implements Iterable<Model>
 		models.put(model.name, model);
 	}
 
-	public static final String KEY = ModelSet.class.getName();
+	public LuaInterpreter stitcher()
+	{
+		patchCount = 0;
+		throw new Error("TODO: Create an interpreter to feed the patches to");
+	}
+
+	public boolean isPatchy()
+	{
+		return patchCount >= 0;
+	}
+
+	public int getPatchCount()
+	{
+		return patchCount;
+	}
 
 	@Override
 	public Iterator<Model> iterator()
@@ -62,4 +79,6 @@ public class ModelSet implements Iterable<Model>
 			return itr.next().getValue();
 		}
 	}
+
+	public static final String KEY = ModelSet.class.getName();
 }

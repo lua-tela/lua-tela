@@ -14,10 +14,17 @@ import static com.hk.luatela.installer.Installer.splitToLinesByLen;
 
 public abstract class PatchCommand extends Installer.Command
 {
+	protected String dataroot;
+
 	@Override
 	void execute(LinkedList<String> arguments)
 	{
-		LuaBase base = getBase(arguments);
+		getParams(arguments);
+
+		if(!arguments.isEmpty())
+			System.err.println("\nUnexpected command line parameter(s): " + arguments + "\n");
+
+		LuaBase base = getBase();
 
 		loadPatches(base);
 
@@ -33,23 +40,27 @@ public abstract class PatchCommand extends Installer.Command
 	void handle(LuaBase base, PatchComparison comparison)
 	{}
 
-	LuaBase getBase(LinkedList<String> arguments)
+	void getParams(LinkedList<String> arguments)
 	{
-		LuaBase base;
-		String dataroot = Installer.getParam(arguments, "--dataroot");
+		dataroot = Installer.getParam(arguments, "--dataroot");
 
 		if(dataroot == null)
 			dataroot =  "base";
+	}
 
+	LuaBase getBase()
+	{
 		try
 		{
-			base = new LuaBase(new File(dataroot));
+			return new LuaBase(new File(dataroot));
 		}
 		catch (FileNotFoundException e)
 		{
-			throw new UncheckedIOException(e);
+			if(dataroot.equals("base"))
+				throw new RuntimeException("Expected 'dataroot' parameter or 'base' folder");
+			else
+				throw new RuntimeException(e);
 		}
-		return base;
 	}
 
 	void loadPatches(LuaBase base)

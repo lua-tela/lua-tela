@@ -19,6 +19,7 @@ public class PrintOutCommand extends Installer.Command
 
 		if(pProps || !pEnv)
 		{
+			// don't these lines look like a penis?
 			System.out.println();
 			System.out.println("[==[ Printing Properties ]==]");
 			System.out.println();
