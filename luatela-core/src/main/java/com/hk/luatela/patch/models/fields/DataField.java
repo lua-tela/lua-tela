@@ -1,10 +1,10 @@
 package com.hk.luatela.patch.models.fields;
 
-import com.hk.lua.Lua;
 import com.hk.lua.LuaInterpreter;
 import com.hk.lua.LuaObject;
 import com.hk.lua.LuaUserdata;
 import com.hk.luatela.patch.models.Model;
+import com.hk.str.HTMLText;
 
 import java.util.function.BiFunction;
 
@@ -28,6 +28,9 @@ public abstract class DataField extends LuaUserdata implements Comparable<DataFi
 
 		return this;
 	}
+
+	public void exportProps(HTMLText txt)
+	{}
 
 	@Override
 	public DataField getUserdata()

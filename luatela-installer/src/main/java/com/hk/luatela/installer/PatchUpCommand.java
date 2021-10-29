@@ -30,6 +30,8 @@ public class PatchUpCommand extends PatchCommand
 		if(!patches.exists())
 			patches.mkdirs();
 
+		System.out.println("To file: " + new File(patches, export.getName() + ".lua"));
+		System.out.println(code);
 		// OUTPUT TO PATCH FILE
 
 //		FileUtil.resetFile(patchFile, code);

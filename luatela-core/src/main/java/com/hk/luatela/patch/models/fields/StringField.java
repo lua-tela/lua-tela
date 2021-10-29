@@ -3,6 +3,7 @@ package com.hk.luatela.patch.models.fields;
 import com.hk.lua.LuaException;
 import com.hk.lua.LuaObject;
 import com.hk.luatela.patch.models.Model;
+import com.hk.str.HTMLText;
 
 public class StringField extends DataField
 {
@@ -27,6 +28,12 @@ public class StringField extends DataField
 		}
 
 		return super.accept(properties);
+	}
+
+	@Override
+	public void exportProps(HTMLText txt)
+	{
+		txt.wr("length=").wr(String.valueOf(this.length));
 	}
 
 	@Override

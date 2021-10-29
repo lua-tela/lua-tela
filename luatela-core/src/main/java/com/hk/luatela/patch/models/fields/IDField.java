@@ -14,4 +14,10 @@ public class IDField extends IntegerField
 		super(parent, name);
 		this.primary = primary;
 	}
+
+	@Override
+	public String name()
+	{
+		return "*FIELD_ID";
+	}
 }

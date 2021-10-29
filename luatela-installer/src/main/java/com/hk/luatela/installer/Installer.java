@@ -1,5 +1,7 @@
 package com.hk.luatela.installer;
 
+import com.hk.luatela.patch.LuaBase;
+
 import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Supplier;
@@ -17,7 +19,7 @@ public class Installer
 		System.out.println(" */");
 		System.out.println();
 		System.out.print("Date: ");
-		System.out.println(FULL_FORMAT.format(new Date()));
+		System.out.println(LuaBase.FULL_FORMAT.format(new Date()));
 	}
 
 	public static void main(String[] args)
@@ -251,7 +253,6 @@ public class Installer
 
 	private static Scanner in;
 	private static final Map<String, Supplier<Command>> commands = new TreeMap<>();
-	public static final DateFormat FULL_FORMAT = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL);
 
 	static
 	{

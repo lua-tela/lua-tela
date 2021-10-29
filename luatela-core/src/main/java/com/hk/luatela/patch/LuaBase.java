@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.sql.Connection;
+import java.text.DateFormat;
 
 public class LuaBase
 {
@@ -40,6 +41,9 @@ public class LuaBase
 		patchModelSet = new ModelSet();
 		File patchesDir = new File(dataroot, ".patches");
 
+
+		patchModelSet.startStitch();
+
 		if(!patchesDir.exists())
 		{
 			patchesDir.mkdirs();
@@ -48,13 +52,17 @@ public class LuaBase
 
 		File[] patches = patchesDir.listFiles();
 
-		if(patches != null)
+		if(patches != null && patches.length > 0)
 		{
+			LuaInterpreter interp = Lua.interpreter();
+
 			// one by one, apply patches to fresh model set
 			// compare to newly read model set, and recreate patch
 			for(File patch : patches)
 				throw new Error("APPLY PATCHES TOGETHER");
 		}
+
+		patchModelSet.endStitch();
 
 		return patches != null ? patches.length : 0;
 	}
@@ -102,4 +110,6 @@ public class LuaBase
 	{
 		return modelSet;
 	}
+
+	public static final DateFormat FULL_FORMAT = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL);
 }

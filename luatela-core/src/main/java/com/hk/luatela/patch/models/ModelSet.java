@@ -36,10 +36,14 @@ public class ModelSet implements Iterable<Model>
 		models.put(model.name, model);
 	}
 
-	public LuaInterpreter stitcher()
+	public void startStitch()
 	{
 		patchCount = 0;
-		throw new Error("TODO: Create an interpreter to feed the patches to");
+	}
+
+	public void endStitch()
+	{
+		patchCount = -patchCount;
 	}
 
 	public boolean isPatchy()
