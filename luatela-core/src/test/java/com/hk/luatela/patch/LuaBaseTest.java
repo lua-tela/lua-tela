@@ -41,8 +41,7 @@ public class LuaBaseTest
 
 		assertEquals(0, base.loadPatches());
 
-		assertTrue(patches.exists());
-		assertTrue(patches.delete());
+		assertFalse(patches.exists());
 
 		try
 		{
@@ -103,6 +102,6 @@ public class LuaBaseTest
 		assertFalse(fieldMap.get("scienceGrade").isPrimary());
 		assertFalse(fieldMap.get("englishGrade").isPrimary());
 
-		assertTrue(new File(dataroot, ".patches").delete());
+		assertFalse(new File(dataroot, ".patches").exists());
 	}
 }

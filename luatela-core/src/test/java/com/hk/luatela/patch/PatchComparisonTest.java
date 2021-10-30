@@ -50,21 +50,6 @@ public class PatchComparisonTest
 		assertEquals(3, comparison.newModels[0].getFields().size());
 	}
 
-	private LuaBase wrap(ModelSet set)
-	{
-		try
-		{
-			LuaBase base = new LuaBase(modelDir);
-			base.patchModelSet = set;
-			return base;
-		}
-		catch (FileNotFoundException e)
-		{
-			fail(e.getLocalizedMessage());
-			return null;
-		}
-	}
-
 	@Test
 	public void testEmptyToMultiple() throws FileNotFoundException, DatabaseException
 	{
@@ -83,5 +68,20 @@ public class PatchComparisonTest
 		assertEquals("test_model1", comparison.newModels[0].name);
 		assertEquals("test_model2", comparison.newModels[1].name);
 		assertEquals("test_model3", comparison.newModels[2].name);
+	}
+
+	private LuaBase wrap(ModelSet set)
+	{
+		try
+		{
+			LuaBase base = new LuaBase(modelDir);
+			base.patchModelSet = set;
+			return base;
+		}
+		catch (FileNotFoundException e)
+		{
+			fail(e.getLocalizedMessage());
+			return null;
+		}
 	}
 }

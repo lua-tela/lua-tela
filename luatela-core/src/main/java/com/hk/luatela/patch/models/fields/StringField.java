@@ -5,6 +5,8 @@ import com.hk.lua.LuaObject;
 import com.hk.luatela.patch.models.Model;
 import com.hk.str.HTMLText;
 
+import java.util.Map;
+
 public class StringField extends DataField
 {
 	private int length;
@@ -31,9 +33,13 @@ public class StringField extends DataField
 	}
 
 	@Override
-	public void exportProps(HTMLText txt)
+	public Map<String, String> exportProps(Map<String, String> map)
 	{
-		txt.wr("length=").wr(String.valueOf(this.length));
+		map = super.exportProps(map);
+
+		map.put("length", String.valueOf(this.length));
+
+		return map;
 	}
 
 	@Override

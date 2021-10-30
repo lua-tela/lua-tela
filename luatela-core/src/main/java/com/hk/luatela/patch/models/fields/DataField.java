@@ -6,6 +6,7 @@ import com.hk.lua.LuaUserdata;
 import com.hk.luatela.patch.models.Model;
 import com.hk.str.HTMLText;
 
+import java.util.Map;
 import java.util.function.BiFunction;
 
 public abstract class DataField extends LuaUserdata implements Comparable<DataField>
@@ -29,8 +30,12 @@ public abstract class DataField extends LuaUserdata implements Comparable<DataFi
 		return this;
 	}
 
-	public void exportProps(HTMLText txt)
-	{}
+	public Map<String, String> exportProps(Map<String, String> map)
+	{
+		map.put("primary", String.valueOf(primary));
+
+		return map;
+	}
 
 	@Override
 	public DataField getUserdata()

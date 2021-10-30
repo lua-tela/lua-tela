@@ -86,7 +86,20 @@ public class PatchExport
 	private void toLua(HTMLText txt, DataField field)
 	{
 		txt.wr("'").wr(field.name().substring(7).toLowerCase()).wr("', {");
-		field.exportProps(txt);
+		Map<String, String> props = field.exportProps(new LinkedHashMap<>());
+
+		Iterator<Map.Entry<String, String>> itr = props.entrySet().iterator();
+
+		while(itr.hasNext())
+		{
+			Map.Entry<String, String> entry = itr.next();
+
+			txt.wr(entry.getKey()).wr("=").wr(entry.getValue());
+
+			if(itr.hasNext())
+				txt.wr(", ");
+		}
+
 		txt.wr("} ");
 	}
 }

@@ -46,7 +46,7 @@ public class LuaBase
 
 		if(!patchesDir.exists())
 		{
-			patchesDir.mkdirs();
+			patchModelSet.endStitch();
 			return 0;
 		}
 
