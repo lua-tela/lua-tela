@@ -6,6 +6,7 @@ import com.hk.luatela.patch.models.fields.DataField;
 import com.hk.luatela.patch.models.fields.FloatField;
 import com.hk.luatela.patch.models.fields.IDField;
 import com.hk.luatela.patch.models.fields.StringField;
+import com.hk.str.HTMLText;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -103,5 +104,16 @@ public class LuaBaseTest
 		assertFalse(fieldMap.get("englishGrade").isPrimary());
 
 		assertFalse(new File(dataroot, ".patches").exists());
+
+		PatchExport export = comparison.export();
+		assertNotNull(export);
+
+		String exportName = export.getName();
+		assertNotNull(exportName);
+		assertTrue(exportName.startsWith("patch-1"));
+
+		HTMLText txt = new HTMLText();
+
+		assertSame(txt, export.toLua(txt));
 	}
 }
