@@ -1,11 +1,13 @@
 package com.hk.luatela.patch;
 
 import com.hk.luatela.patch.models.ModelSet;
+import com.hk.str.HTMLText;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.UncheckedIOException;
 
 import static org.junit.Assert.*;
 
@@ -48,6 +50,22 @@ public class PatchComparisonTest
 		assertEquals(1, comparison.newModels.length);
 		assertEquals("point", comparison.newModels[0].name);
 		assertEquals(3, comparison.newModels[0].getFields().size());
+
+		PatchExport export = comparison.export();
+		assertNotNull(export);
+
+		String exportName = export.getName();
+		assertNotNull(exportName);
+
+		assertTrue(exportName.startsWith("patch-1"));
+
+		HTMLText txt = new HTMLText();
+
+		assertSame(txt, export.toLua(txt));
+
+		String code = txt.create();
+
+		assertTrue(code.contains("models['point'] ="));
 	}
 
 	@Test
@@ -75,13 +93,14 @@ public class PatchComparisonTest
 		try
 		{
 			LuaBase base = new LuaBase(modelDir);
+			set.startStitch();
 			base.patchModelSet = set;
+			set.endStitch();
 			return base;
 		}
 		catch (FileNotFoundException e)
 		{
-			fail(e.getLocalizedMessage());
-			return null;
+			throw new UncheckedIOException(e);
 		}
 	}
 }

@@ -14,8 +14,7 @@ public class PrintOutCommand extends Installer.Command
 		boolean pProps = Installer.getFlag(arguments, "-props");
 		boolean pEnv = Installer.getFlag(arguments, "-env");
 
-		if(!arguments.isEmpty())
-			System.err.println("\nUnexpected command line parameter(s): " + arguments + "\n");
+		checkArgs(arguments);
 
 		if(pProps || !pEnv)
 		{

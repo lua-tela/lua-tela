@@ -261,6 +261,8 @@ public class Installer
 		commands.put("print-out", PrintOutCommand::new);
 		commands.put("patch-compare", PatchCompareCommand::new);
 		commands.put("patch-up", PatchUpCommand::new);
+		commands.put("make-bash", () -> new MakeScriptCommand(true));
+		commands.put("make-batch", () -> new MakeScriptCommand(false));
 	}
 
 	private static class HelpCommand extends Command
@@ -337,5 +339,11 @@ public class Installer
 		abstract void help();
 
 		void close() {}
+
+		static void checkArgs(LinkedList<String> arguments)
+		{
+			if(!arguments.isEmpty())
+				System.err.println("\nUnexpected command line parameter(s): " + arguments + "\n");
+		}
 	}
 }

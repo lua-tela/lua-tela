@@ -21,8 +21,7 @@ public abstract class PatchCommand extends Installer.Command
 	{
 		getParams(arguments);
 
-		if(!arguments.isEmpty())
-			System.err.println("\nUnexpected command line parameter(s): " + arguments + "\n");
+		checkArgs(arguments);
 
 		LuaBase base = getBase();
 

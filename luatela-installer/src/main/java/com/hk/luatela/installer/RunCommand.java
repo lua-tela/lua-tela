@@ -141,8 +141,7 @@ class RunCommand extends Installer.Command
 				sslEnabled = true;
 			}
 
-			if(!arguments.isEmpty())
-				System.err.println("\nUnexpected command line parameter(s): " + arguments + "\n");
+			checkArgs(arguments);
 
 			this.server = new Server();
 
