@@ -58,25 +58,25 @@ public class LuaContext
 
 			long index = 1;
 			FileUpload fu;
-			Map<String, LuaObject> params = new HashMap<>();
+			Map<String, LuaObject> post = new HashMap<>();
 			for(FileItem fi : lst)
 			{
 				if(fi.isFormField())
 				{
-					params.put(fi.getFieldName(), Lua.newString(fi.getString()));
+					post.put(fi.getFieldName(), Lua.newString(fi.getString()));
 				}
 				else if(fi.getSize() != 0)
 				{
 					fu = new FileUpload(fi);
 					tbl.rawSet(index++, fu);
 					tbl.rawSet(fi.getFieldName(), fu);
-					params.put(fi.getFieldName(), fu);
+					post.put(fi.getFieldName(), fu);
 				}
 			}
 			if(index == 1)
 				tbl = null;
 			else
-				interp.setExtra("params", params);
+				interp.setExtra("post", post);
 		}
 		catch (FileUploadBase.InvalidContentTypeException ex)
 		{

@@ -6,12 +6,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -19,8 +17,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -35,32 +31,83 @@ public class RequestLibraryTest
 	}
 
 	@Test
-	public void testParams() throws IOException
+	public void testGet() throws IOException
 	{
 		HttpGet request;
 		HttpResponse response;
+		StringBuilder query;
 
-		request = new HttpGet("/request/params");
+		request = new HttpGet("/request/get");
 		response = client.execute(LuaTelaTest.config, request);
 
 		assertEquals(200, response.getStatusLine().getStatusCode());
 
 		assertEquals("20000", EntityUtils.toString(response.getEntity()));
 
-		String query = URLEncodedUtils.format(Arrays.asList(
-				new BasicNameValuePair("key1", "value1"),
-				new BasicNameValuePair("key2", null),
-				new BasicNameValuePair("keyA", "2"),
-				new BasicNameValuePair("keyB", "4"),
-				new BasicNameValuePair("keyD", "8")
-		), StandardCharsets.UTF_8);
-		request = new HttpGet("/request/params/test?" + query);
+		query = new StringBuilder("key=value");
+		request = new HttpGet("/request/get/single?" + query);
 
 		response = client.execute(LuaTelaTest.config, request);
 
 		assertEquals(200, response.getStatusLine().getStatusCode());
 
 		assertEquals("20001", EntityUtils.toString(response.getEntity()));
+
+		query = new StringBuilder("ampersand=%26");
+		request = new HttpGet("/request/get/ampersand?" + query);
+
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		assertEquals("20002", EntityUtils.toString(response.getEntity()));
+
+		query = new StringBuilder("B00B135");
+		request = new HttpGet("/request/get/querycookie?" + query);
+
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		assertEquals("20003", EntityUtils.toString(response.getEntity()));
+
+		String[][] strings = {
+			{ "c", "%63" }, { "a", "%61" }, { "t", "%74" },
+			{ "d", "%64" }, { "o", "%6F" }, { "g", "%67" }
+		};
+
+		query = new StringBuilder(64);
+		for (int i = 0; i < 64; i++)
+		{
+			query.append("/request/get/catdog?");
+
+			for (int j = 0; j < 6; j++)
+			{
+				if(j == 3)
+					query.append('=');
+
+				query.append(strings[j][(i >> j) & 1]);
+			}
+
+			request = new HttpGet(query.toString());
+			query.setLength(0);
+
+			response = client.execute(LuaTelaTest.config, request);
+
+			assertEquals(200, response.getStatusLine().getStatusCode());
+
+			assertEquals("20004", EntityUtils.toString(response.getEntity()));
+		}
+
+
+		query = new StringBuilder("key1=value%31&key2=&key4&keyA=2&keyB=%26&keyC&keyD=8");
+		request = new HttpGet("/request/get/multiple?" + query);
+
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		assertEquals("20005", EntityUtils.toString(response.getEntity()));
 	}
 
 	@Test

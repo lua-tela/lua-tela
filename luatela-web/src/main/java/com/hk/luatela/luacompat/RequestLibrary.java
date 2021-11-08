@@ -3,12 +3,12 @@ package com.hk.luatela.luacompat;
 import com.hk.func.BiConsumer;
 import com.hk.lua.*;
 import com.hk.luatela.LuaContext;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 import javax.servlet.http.HttpSession;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @SuppressWarnings({"unused", "unchecked"})
 public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMethod
@@ -19,7 +19,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			Lua.checkArgs(name(), args, LuaType.STRING);
 
-			Map<String, LuaObject> params = interp.getExtra("params", Map.class);
+			Map<String, LuaObject> params = interp.getExtra("post", Map.class);
 
 			if(params == null)
 			{
@@ -38,7 +38,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			Lua.checkArgs(name(), args, LuaType.STRING);
 
-			Map<String, LuaObject> params = interp.getExtra("params", Map.class);
+			Map<String, LuaObject> params = interp.getExtra("post", Map.class);
 
 			if(params == null)
 			{
@@ -260,6 +260,51 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			LuaObject tbl = ctx.getFileTable(env.interp);
 			if(tbl != null)
 				table.setIndex(env.interp, name(), tbl);
+		}
+	},
+	GET() {
+		@Override
+		public void accept(Environment env, LuaObject table)
+		{
+			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
+
+			String query = ctx.request.getQueryString();
+			List<NameValuePair> pairs = URLEncodedUtils.parse(query, StandardCharsets.UTF_8);
+			Map<String, List<LuaObject>> map = new HashMap<>();
+
+			List<LuaObject> list;
+			LuaObject val;
+			for (NameValuePair pair : pairs)
+			{
+				list = map.get(pair.getName());
+				if(pair.getValue() == null)
+					val = Lua.newBoolean(true);
+				else
+					val = Lua.newString(pair.getValue());
+
+				if(list == null)
+					map.put(pair.getName(), new ArrayList<>(Collections.singleton(val)));
+				else
+					list.add(val);
+			}
+
+			LuaObject[] arr;
+			LuaObject tbl = Lua.newTable();
+			for (Map.Entry<String, List<LuaObject>> entry : map.entrySet())
+			{
+				arr = entry.getValue().toArray(new LuaObject[0]);
+				tbl.rawSet(entry.getKey(), arr.length == 0 ? arr[0] : Lua.newVarargs(arr));
+			}
+
+			table.setIndex(env.interp, name(), tbl);
+
+			LuaObject metatable = Lua.newTable();
+
+			metatable.rawSet("__name", "*QUERY");
+			metatable.rawSet("__index", metatable);
+			metatable.rawSet("__tostring", Lua.newFunc((interp, args) -> Lua.newString(query)));
+
+			tbl.setMetatable(metatable);
 		}
 	};
 
