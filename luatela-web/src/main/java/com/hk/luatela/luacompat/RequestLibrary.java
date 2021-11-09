@@ -13,52 +13,6 @@ import java.util.*;
 @SuppressWarnings({"unused", "unchecked"})
 public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMethod
 {
-	hasParam() {
-		@Override
-		public LuaObject call(LuaInterpreter interp, LuaObject[] args)
-		{
-			Lua.checkArgs(name(), args, LuaType.STRING);
-
-			Map<String, LuaObject> params = interp.getExtra("post", Map.class);
-
-			if(params == null)
-			{
-				LuaContext ctx = interp.getExtra("context", LuaContext.class);
-				return Lua.newBoolean(ctx.request.getParameter(args[0].getString()) != null);
-			}
-			else
-			{
-				return Lua.newBoolean(params.containsKey(args[0].getString()));
-			}
-		}
-	},
-	getParam() {
-		@Override
-		public LuaObject call(LuaInterpreter interp, LuaObject[] args)
-		{
-			Lua.checkArgs(name(), args, LuaType.STRING);
-
-			Map<String, LuaObject> params = interp.getExtra("post", Map.class);
-
-			if(params == null)
-			{
-				LuaContext ctx = interp.getExtra("context", LuaContext.class);
-				String s = ctx.request.getParameter(args[0].getString());
-				if(s == null && args.length > 1)
-					return args[1];
-				else
-					return Lua.newString(s);
-			}
-			else
-			{
-				LuaObject obj = params.get(args[0].getString());
-				if(obj == null)
-					return args.length > 1 ? args[1] : Lua.nil();
-				else
-					return obj;
-			}
-		}
-	},
 	host() {
 		@Override
 		public void accept(Environment env, LuaObject table)
@@ -305,6 +259,54 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			metatable.rawSet("__tostring", Lua.newFunc((interp, args) -> Lua.newString(query)));
 
 			tbl.setMetatable(metatable);
+		}
+	},
+	POST() {
+		@Override
+		public void accept(Environment env, LuaObject table)
+		{
+			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
+
+			LuaObject tbl = Lua.nil();
+
+			if(env.interp.hasExtra("post"))
+			{
+				tbl = Lua.newTable();
+				Map<String, LuaObject> post = (Map<String, LuaObject>) env.interp.getExtra("post");
+
+				for (Map.Entry<String, LuaObject> entry : post.entrySet())
+					tbl.rawSet(entry.getKey(), entry.getValue());
+			}
+			else if(ctx.method.equals("post") || ctx.method.equals("put"))
+			{
+				tbl = Lua.newTable();
+				Map<String, String[]> map = ctx.request.getParameterMap();
+
+				String[] arr;
+				for (Map.Entry<String, String[]> entry : map.entrySet())
+				{
+					arr = entry.getValue();
+
+					switch (arr.length)
+					{
+					case 0:
+						tbl.rawSet(entry.getKey(), Lua.newBoolean(true));
+						break;
+					case 1:
+						tbl.rawSet(entry.getKey(), Lua.newString(arr[0]));
+						break;
+					default:
+						LuaObject[] objs = new LuaObject[arr.length];
+						for (int i = 0; i < arr.length; i++)
+							objs[i] = Lua.newString(arr[i]);
+
+						tbl.rawSet(entry.getKey(), Lua.newVarargs(objs));
+						break;
+					}
+				}
+			}
+
+			table.setIndex(env.interp, name(), tbl);
 		}
 	};
 

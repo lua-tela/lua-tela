@@ -4,6 +4,8 @@ assert(url)
 assert(request.GET)
 
 if url == '/single' then
+    assert(request.method == 'get')
+
     local query = 'key=value'
     assert(tostring(request.GET) == query)
 
@@ -12,6 +14,8 @@ if url == '/single' then
 
     return 20001
 elseif url == '/ampersand' then
+    assert(request.method == 'get')
+
     local query = 'ampersand=%26'
     assert(tostring(request.GET) == query)
 
@@ -20,6 +24,8 @@ elseif url == '/ampersand' then
 
     return 20002
 elseif url == '/querycookie' then
+    assert(request.method == 'get')
+
     local query = 'B00B135'
     assert(tostring(request.GET) == query)
 
@@ -27,7 +33,8 @@ elseif url == '/querycookie' then
     assert(request.GET['B00B135'] == true)
 
     return 20003
-elseif url == '/catdog' then
+elseif url:find('/(get|post)-catdog') then
+    assert(request.method == url:match('/(.*)-catdog'))
     assert(request.GET['cat'])
     assert(request.GET['cat'] == 'dog')
 
@@ -56,6 +63,19 @@ elseif url == '/multiple' then
     assert(request.GET['keyD'] == '8')
 
     return 20005
+elseif url == '/flags' then
+    local query = 'flag1&flag2&flag3'
+    assert(tostring(request.GET) == query)
+
+    assert(request.GET['flag1'])
+    assert(request.GET['flag2'])
+    assert(request.GET['flag3'])
+
+    assert(request.GET['flag1'] == true)
+    assert(request.GET['flag2'] == true)
+    assert(request.GET['flag3'] == true)
+
+    return 20006
 end
 
 return 20000

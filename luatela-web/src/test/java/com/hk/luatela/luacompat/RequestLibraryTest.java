@@ -7,6 +7,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.HttpClients;
@@ -71,34 +72,31 @@ public class RequestLibraryTest
 
 		assertEquals("20003", EntityUtils.toString(response.getEntity()));
 
-		String[][] strings = {
-			{ "c", "%63" }, { "a", "%61" }, { "t", "%74" },
-			{ "d", "%64" }, { "o", "%6F" }, { "g", "%67" }
-		};
-
 		query = new StringBuilder(64);
-		for (int i = 0; i < 64; i++)
+		for (int i = 0; i < 128; i++)
 		{
-			query.append("/request/get/catdog?");
+			query.append("/request/get/");
+			query.append(i % 2 == 0 ? "get" : "post");
+			query.append("-catdog?");
 
 			for (int j = 0; j < 6; j++)
 			{
 				if(j == 3)
 					query.append('=');
 
-				query.append(strings[j][(i >> j) & 1]);
+				query.append(catdog[j][(i >> (j + 1)) & 1]);
 			}
 
-			request = new HttpGet(query.toString());
+			if(i % 2 == 0)
+				response = client.execute(LuaTelaTest.config, new HttpGet(query.toString()));
+			else
+				response = client.execute(LuaTelaTest.config, new HttpPost(query.toString()));
 			query.setLength(0);
-
-			response = client.execute(LuaTelaTest.config, request);
 
 			assertEquals(200, response.getStatusLine().getStatusCode());
 
 			assertEquals("20004", EntityUtils.toString(response.getEntity()));
 		}
-
 
 		query = new StringBuilder("key1=value%31&key2=&key4&keyA=2&keyB=%26&keyC&keyD=8");
 		request = new HttpGet("/request/get/multiple?" + query);
@@ -108,6 +106,79 @@ public class RequestLibraryTest
 		assertEquals(200, response.getStatusLine().getStatusCode());
 
 		assertEquals("20005", EntityUtils.toString(response.getEntity()));
+
+		query = new StringBuilder("flag1&flag2&flag3");
+		request = new HttpGet("/request/get/flags?" + query);
+
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		assertEquals("20006", EntityUtils.toString(response.getEntity()));
+	}
+
+	@Test
+	public void testPost() throws IOException
+	{
+		HttpPost request;
+		HttpResponse response;
+		String query;
+
+		response = client.execute(LuaTelaTest.config, new HttpGet("/request/post"));
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("21000", EntityUtils.toString(response.getEntity()));
+
+		request = new HttpPost("/request/post/single");
+
+		query = "key=value";
+		request.setEntity(new StringEntity(query, ContentType.APPLICATION_FORM_URLENCODED));
+
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("21001", EntityUtils.toString(response.getEntity()));
+
+		request = new HttpPost("/request/post/multiple");
+
+		query = "and=his&name=was&john=cena";
+		request.setEntity(new StringEntity(query, ContentType.APPLICATION_FORM_URLENCODED));
+
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("21002", EntityUtils.toString(response.getEntity()));
+
+		request = new HttpPost("/request/post/empty");
+
+		query = "empty1&empty2=";
+		request.setEntity(new StringEntity(query, ContentType.APPLICATION_FORM_URLENCODED));
+
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("21003", EntityUtils.toString(response.getEntity()));
+
+		StringBuilder sb = new StringBuilder(32);
+		for (int i = 0; i < 64; i++)
+		{
+			for (int j = 0; j < 6; j++)
+			{
+				if(j == 3)
+					sb.append('=');
+
+				sb.append(catdog[j][(i >> j) & 1]);
+			}
+
+			request = new HttpPost("/request/post/catdog");
+			request.setEntity(new StringEntity(sb.toString(), ContentType.APPLICATION_FORM_URLENCODED));
+			sb.setLength(0);
+
+			response = client.execute(LuaTelaTest.config, request);
+
+			assertEquals(200, response.getStatusLine().getStatusCode());
+
+			assertEquals("21004", EntityUtils.toString(response.getEntity()));
+		}
 	}
 
 	@Test
@@ -240,4 +311,9 @@ public class RequestLibraryTest
 	{
 		client = null;
 	}
+
+	private static final String[][] catdog = {
+		{ "c", "%63" }, { "a", "%61" }, { "t", "%74" },
+		{ "d", "%64" }, { "o", "%6F" }, { "g", "%67" }
+	};
 }

@@ -17,8 +17,8 @@ elseif url == '/info.txt' then
     assert(infotxt:toString() == "this is my file. there are many like it. but this one is mine")
     assert(infotxt:getSize() == 61)
 
-    assert(request.hasParam("alsopost"))
-    assert(request.getParam("alsopost") == 'exists')
+    assert(request.POST['alsopost'])
+    assert(request.POST['alsopost'] == 'exists')
 
     return 10001
 end
