@@ -1,1 +1,1 @@
-print "Loading 'models.lua'"
+print 'Loading models'

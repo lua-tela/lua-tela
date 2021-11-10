@@ -35,6 +35,8 @@ public class MakeScriptCommand extends Installer.Command
 		if(fileName == null)
 			fileName = "luatela";
 
+		String dataroot = Installer.getParam(arguments, "--dataroot");
+
 		HTMLText txt = new HTMLText();
 		if(unix)
 		{
@@ -43,16 +45,18 @@ public class MakeScriptCommand extends Installer.Command
 
 			String target = Installer.getParam(arguments, "--target");
 
-			exportBash(txt, target);
+			exportBash(txt, dataroot, target);
 		}
 		else
 		{
 			if(!Installer.getFlag(arguments, "-no-extension"))
 				fileName += ".bat";
 
-			exportBatch(txt);
+			exportBatch(txt, dataroot);
 		}
 		script = script.resolve(fileName);
+
+		boolean overwrite = Installer.getFlag(arguments, "-overwrite");
 
 		checkArgs(arguments);
 
@@ -62,7 +66,7 @@ public class MakeScriptCommand extends Installer.Command
 
 			if(Files.exists(script))
 			{
-				if (!Installer.getFlag(arguments, "-overwrite"))
+				if (!overwrite)
 				{
 					cont = false;
 					System.err.println("\nFile already exists!\n");
@@ -85,14 +89,26 @@ public class MakeScriptCommand extends Installer.Command
 		}
 	}
 
-	private void exportBatch(HTMLText txt)
+	private void exportBatch(HTMLText txt, String dataroot)
 	{
 		txt.prln("@echo off").ln();
 
-		txt.prln("java -jar luatela.jar %*");
+		txt.pr("java -jar ");
+
+		if(dataroot != null)
+		{
+			dataroot = dataroot.replace("\"", "\\\"");
+			txt.wr("-D")
+					.wr(Installer.BASE_PROPERTY)
+					.wr("=\"")
+					.wr(dataroot)
+					.wr("\" ");
+		}
+
+		txt.wrln("luatela.jar %*");
 	}
 
-	private void exportBash(HTMLText txt, String target)
+	private void exportBash(HTMLText txt, String dataroot, String target)
 	{
 		if(target == null)
 			target = "/usr/bin/env bash";
@@ -139,6 +155,15 @@ public class MakeScriptCommand extends Installer.Command
 				"script will be generated. It should be the current " +
 				"directory since this is where the 'jar' file would " +
 				"be.";
+		for(String line : splitToLinesByLen(str, 50))
+			txt.prln(line);
+		txt.tabDown();
+
+		txt.prln("--dataroot").tabUp();
+		str = "This parameter will specify the dataroot directory " +
+				"which is used in various places in Lua Tela. It " +
+				"can be set as a system property within the script " +
+				"for easier use.";
 		for(String line : splitToLinesByLen(str, 50))
 			txt.prln(line);
 		txt.tabDown();

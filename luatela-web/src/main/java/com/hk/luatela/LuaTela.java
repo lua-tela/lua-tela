@@ -106,7 +106,7 @@ public class LuaTela
 			{
 				Path fullPath = Paths.get(string);
 				if (Files.exists(fullPath))
-					return fullPath;
+					return fullPath.toAbsolutePath();
 			}
 			catch (InvalidPathException ignored)
 			{}

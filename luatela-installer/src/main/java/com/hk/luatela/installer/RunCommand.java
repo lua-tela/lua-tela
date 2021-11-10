@@ -32,11 +32,8 @@ class RunCommand extends Installer.Command
 	{
 		String dataroot = Installer.getParam(arguments, "--dataroot");
 
-		if(dataroot == null)
-		{
-			arguments.addLast("--dataroot");
-			arguments.addLast("rel:base");
-		}
+		arguments.addLast("--dataroot");
+		arguments.addLast(dataroot == null ? Installer.getBase("rel:base") : dataroot);
 
 		try
 		{

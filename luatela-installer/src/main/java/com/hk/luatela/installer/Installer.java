@@ -251,13 +251,20 @@ public class Installer
 		return false;
 	}
 
+	static final String getBase(String def)
+	{
+		return System.getProperty(BASE_PROPERTY, def);
+	}
+
 	private static Scanner in;
 	private static final Map<String, Supplier<Command>> commands = new TreeMap<>();
+	static final String BASE_PROPERTY = "luatela.base";
 
 	static
 	{
 		commands.put("help", HelpCommand::new);
 		commands.put("run", RunCommand::new);
+		commands.put("init", InitCommand::new);
 		commands.put("print-out", PrintOutCommand::new);
 		commands.put("patch-compare", PatchCompareCommand::new);
 		commands.put("patch-up", PatchUpCommand::new);
