@@ -190,7 +190,7 @@ class RunCommand extends Installer.Command
 			
 			while(true)
 			{
-				line = in.nextLine();
+				line = Installer.nextLine();
 
 				if("stop".equalsIgnoreCase(line))
 					break;

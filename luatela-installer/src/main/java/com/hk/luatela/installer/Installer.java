@@ -55,7 +55,7 @@ public class Installer
 			do {
 				System.out.print("cmd: ");
 
-				command = in.nextLine().trim();
+				command = nextLine().trim();
 
 				if (command.isEmpty())
 					continue;
@@ -251,9 +251,21 @@ public class Installer
 		return false;
 	}
 
-	static final String getBase(String def)
+	static String getBase(String def)
 	{
 		return System.getProperty(BASE_PROPERTY, def);
+	}
+
+	static String nextLine()
+	{
+		try
+		{
+			return in.nextLine();
+		}
+		catch (NoSuchElementException ignored)
+		{
+			return null;
+		}
 	}
 
 	private static Scanner in;
