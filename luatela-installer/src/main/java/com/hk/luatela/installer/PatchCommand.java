@@ -44,21 +44,18 @@ public abstract class PatchCommand extends Installer.Command
 		dataroot = Installer.getParam(arguments, "--dataroot");
 
 		if(dataroot == null)
-			dataroot =  "base";
+			dataroot =  Installer.getBase("base");
 	}
 
 	LuaBase getBase()
 	{
 		try
 		{
-			return new LuaBase(new File(dataroot));
+			return new LuaBase(new File(dataroot).getAbsoluteFile());
 		}
 		catch (FileNotFoundException e)
 		{
-			if(dataroot.equals("base"))
-				throw new RuntimeException("Expected 'dataroot' parameter or 'base' folder");
-			else
-				throw new RuntimeException(e);
+			throw new RuntimeException(e);
 		}
 	}
 

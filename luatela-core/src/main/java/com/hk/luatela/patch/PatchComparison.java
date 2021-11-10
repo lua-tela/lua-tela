@@ -45,16 +45,6 @@ public class PatchComparison
 		return null;
 	}
 
-	public void printSummary(PrintStream out)
-	{
-		if(newModels != null && newModels.length > 0)
-		{
-			out.println("Found " + newModels.length + " new model" + (newModels.length == 1 ? "" : "s"));
-			for (Model newModel : newModels)
-				out.println(newModel.name);
-		}
-	}
-
 	public PatchExport export()
 	{
 		return new PatchExport(base, this);

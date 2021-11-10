@@ -106,6 +106,7 @@ public class MakeScriptCommand extends Installer.Command
 		}
 
 		txt.wrln("luatela.jar %*");
+		txt.prln("exit /b");
 	}
 
 	private void exportBash(HTMLText txt, String dataroot, String target)
@@ -115,7 +116,18 @@ public class MakeScriptCommand extends Installer.Command
 
 		txt.prln("#!" + target).ln();
 
-		txt.prln("java -jar luatela.jar \"$@\"");
+		txt.pr("java -jar ");
+
+		if(dataroot != null)
+		{
+			dataroot = dataroot.replace("\"", "\\\"");
+			txt.wr("-D")
+					.wr(Installer.BASE_PROPERTY)
+					.wr("=\"")
+					.wr(dataroot)
+					.wr("\" ");
+		}
+		txt.prln("luatela.jar \"$@\"");
 	}
 
 	void help()

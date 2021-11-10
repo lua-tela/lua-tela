@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import static com.hk.luatela.installer.Installer.splitToLinesByLen;
 
@@ -29,41 +29,45 @@ public class InitCommand extends Installer.Command
 
 		checkArgs(arguments);
 
-		Path dataRoot = Paths.get(datarootParam);
+		Path dataroot = Paths.get(datarootParam).toAbsolutePath();
 
 		try
 		{
-			if (Files.exists(dataRoot) && !Files.isDirectory(dataRoot))
-				throw new IllegalStateException("datarootParam parameter points to file not datarootParam.");
+			if (Files.exists(dataroot) && !Files.isDirectory(dataroot))
+				throw new IllegalStateException("dataroot parameter points to file not dataroot.");
 
-			if (removeFirst && Files.exists(dataRoot))
+			if (removeFirst && Files.exists(dataroot))
 				FileUtil.deleteDirectory(datarootParam);
 
 			if (!parents)
 			{
-				if(!Files.exists(dataRoot.getParent()))
-					throw new IllegalStateException("Cannot create init datarootParam, missing parent. (use '-parents' flag)");
+				if(!Files.exists(dataroot.getParent()))
+					throw new IllegalStateException("Cannot create init directory, missing parent. (use '-parents' flag)");
 
-				Files.createDirectory(dataRoot);
+				if(!Files.exists(dataroot))
+					Files.createDirectory(dataroot);
 			}
 			else
-				Files.createDirectories(dataRoot);
+				Files.createDirectories(dataroot);
 
-			Files.createDirectory(dataRoot.resolve("pages"));
+			Path pages = dataroot.resolve("pages");
+			if(!Files.exists(pages))
+				Files.createDirectory(pages);
 
 			HTMLText txt;
 			List<String> skipped = new LinkedList<>();
-			Map<String, Function<HTMLText, HTMLText>> files = new HashMap<>();
+			Map<String, Consumer<HTMLText>> files = new HashMap<>();
 			files.put("routes.lua", this::writeRoutes);
 			files.put("models.lua", this::writeModels);
 			files.put("pages/index.lua", this::writeIndexPage);
 
-			for (Map.Entry<String, Function<HTMLText, HTMLText>> entry : files.entrySet())
+			for (Map.Entry<String, Consumer<HTMLText>> entry : files.entrySet())
 			{
-				Path file = dataRoot.resolve(entry.getKey());
+				Path file = dataroot.resolve(entry.getKey());
 				if (!Files.exists(file) || overwrite)
 				{
-					txt = entry.getValue().apply(new HTMLText());
+					txt = new HTMLText();
+					entry.getValue().accept(txt);
 					FileUtil.resetFile(file.toFile(), txt.create());
 				}
 				else
@@ -85,19 +89,19 @@ public class InitCommand extends Installer.Command
 		}
 	}
 
-	private HTMLText writeRoutes(HTMLText txt)
+	private void writeRoutes(HTMLText txt)
 	{
-		return txt.wr("path('/').topage('index')");
+		txt.wr("path('/').topage('index')");
 	}
 
-	private HTMLText writeModels(HTMLText txt)
+	private void writeModels(HTMLText txt)
 	{
-		return txt.wr("print 'Loading models'");
+		txt.wr("print 'Loading models'");
 	}
 
-	private HTMLText writeIndexPage(HTMLText txt)
+	private void writeIndexPage(HTMLText txt)
 	{
-		return txt.wrln("response.setContentType('text/html')").ln().wr("return 'OK'");
+		txt.wrln("response.setContentType('text/html')").ln().wr("return 'OK'");
 	}
 
 	void help()

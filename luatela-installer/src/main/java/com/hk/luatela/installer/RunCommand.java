@@ -4,7 +4,6 @@ import com.hk.file.FileUtil;
 import com.hk.io.IOUtil;
 import com.hk.str.HTMLText;
 import org.eclipse.jetty.server.*;
-import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.SecuredRedirectHandler;
 import org.eclipse.jetty.util.resource.Resource;
@@ -14,7 +13,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -95,17 +94,19 @@ class RunCommand extends Installer.Command
 			Files.delete(webXml);
 			Files.move(tempXml, webXml);
 
-			File libDir = tempDir.resolve("WEB-INF/lib").toFile();
-			File[] fs = libDir.listFiles();
-			String name;
-			for(File f : fs)
-			{
-				name = f.getName();
-				if(name.matches("luatela-core.*\\.jar") ||
-						name.matches("hklib.*\\.jar") ||
-						name.matches("mysql-connector-java.*\\.jar"))
-					f.renameTo(new File(libDir, name + ".tmp"));
-			}
+			Path lib = tempDir.resolve("WEB-INF/lib");
+			Files.list(lib)
+				.filter(RunCommand::shouldExclude)
+				.forEach(path -> {
+					try
+					{
+						Files.move(path, Paths.get(path + ".tmp"));
+					}
+					catch (IOException ex)
+					{
+						throw new UncheckedIOException(ex);
+					}
+				});
 
 			int httpPort = 8080;
 			int httpsPort = 8443;
@@ -187,21 +188,29 @@ class RunCommand extends Installer.Command
 				server.setHandler(context);
 
 			server.start();
-			
-			while(true)
+
+			Thread.sleep(1000);
+
+			do
 			{
 				line = Installer.nextLine();
 
-				if("stop".equalsIgnoreCase(line))
-					break;
-
-				System.out.println("Type 'stop' to stop the server");
-			}
+				if(line != null && !line.trim().isEmpty())
+					System.out.println("Type 'stop' to stop the server");
+			} while (!"stop".equalsIgnoreCase(line));
 		}
 		catch (Exception e)
 		{
 			throw new RuntimeException(e);
 		}
+	}
+
+	private static boolean shouldExclude(Path path)
+	{
+		String name = path.getFileName().toString();
+		return name.matches("luatela-core.*\\.jar") ||
+				name.matches("hklib.*\\.jar") ||
+				name.matches("mysql-connector-java.*\\.jar");
 	}
 
 	@Override
