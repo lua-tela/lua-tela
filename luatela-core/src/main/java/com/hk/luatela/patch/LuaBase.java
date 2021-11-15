@@ -9,12 +9,11 @@ import com.hk.luatela.patch.models.ModelSet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.sql.Connection;
 import java.text.DateFormat;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,8 +43,7 @@ public class LuaBase
 			throw new IllegalStateException("Already loaded patchy model set");
 
 		patchModelSet = new ModelSet();
-		File patchesDir = new File(dataroot, ".patches");
-
+		File patchesDir = new File(dataroot, "patches");
 
 		patchModelSet.startStitch();
 
@@ -132,13 +130,12 @@ public class LuaBase
 		if(patches.isEmpty())
 			return 0;
 
-
 		for (Map.Entry<Integer, File> entry : patches.entrySet())
 		{
 			System.out.println(entry.getValue() + " (#" + entry.getKey() + ")");
 		}
 
-		return 0;
+		return patches.size();
 	}
 
 	public static final DateFormat FULL_FORMAT = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL);
