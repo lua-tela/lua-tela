@@ -1,6 +1,10 @@
 package com.hk.luatela.patch;
 
+import com.hk.lua.Lua;
+import com.hk.lua.LuaInterpreter;
+import com.hk.lua.LuaLibrary;
 import com.hk.luatela.patch.models.Model;
+import com.hk.luatela.patch.models.ModelLibrary;
 import com.hk.luatela.patch.models.ModelSet;
 import com.hk.luatela.patch.models.fields.DataField;
 import com.hk.luatela.patch.models.fields.FloatField;
@@ -8,6 +12,7 @@ import com.hk.luatela.patch.models.fields.IDField;
 import com.hk.luatela.patch.models.fields.StringField;
 import com.hk.str.HTMLText;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -30,7 +35,7 @@ public class LuaBaseTest
 	public void testEmpty() throws FileNotFoundException, DatabaseException
 	{
 		File dataroot = new File(root, "base-empty");
-		File patches = new File(dataroot, ".patches");
+		File patches = new File(dataroot, "patches");
 
 		if(!dataroot.exists())
 			assertTrue(dataroot.mkdirs());
@@ -103,7 +108,7 @@ public class LuaBaseTest
 		assertFalse(fieldMap.get("scienceGrade").isPrimary());
 		assertFalse(fieldMap.get("englishGrade").isPrimary());
 
-		assertFalse(new File(dataroot, ".patches").exists());
+		assertFalse(new File(dataroot, "patches").exists());
 
 		PatchExport export = comparison.export();
 		assertNotNull(export);
@@ -120,15 +125,35 @@ public class LuaBaseTest
 	@Test
 	public void testJustPatchUnchanged() throws FileNotFoundException, DatabaseException
 	{
-		File dataroot = new File(root, "base-just-patch-unchanged");
+//		File dataroot = new File(root, "base-just-patch-unchanged");
+//
+//		LuaBase base = new LuaBase(dataroot);
+//		assertEquals(1, base.loadPatches());
+//		PatchComparison comparison = base.checkNew();
+//		assertNotNull(comparison);
+//		assertNull(comparison.attemptCompare());
+//		assertTrue(comparison.unchanged);
+//
+//		assertNotNull(base.patchModelSet.getModel("point"));
+	}
 
-		LuaBase base = new LuaBase(dataroot);
-		assertEquals(1, base.loadPatches());
-		PatchComparison comparison = base.checkNew();
-		assertNotNull(comparison);
-		assertNull(comparison.attemptCompare());
-		assertTrue(comparison.unchanged);
+	@Test
+	public void testModelLibrary() throws FileNotFoundException
+	{
+		File file = new File(root, "model_library.lua");
 
-		assertNotNull(base.patchModelSet.getModel("point"));
+		ModelSet modelSet = new ModelSet();
+
+		LuaInterpreter interp = Lua.reader(file);
+
+		interp.setExtra(ModelSet.KEY, modelSet);
+
+		LuaLibrary.importStandard(interp);
+
+		interp.importLib(new LuaLibrary<>(null, ModelLibrary.class));
+
+		interp.compile();
+
+		assertEquals(Lua.newBoolean(true), interp.execute());
 	}
 }

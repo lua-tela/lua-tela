@@ -42,7 +42,7 @@ public class PatchUpCommand extends PatchCommand
 
 		try
 		{
-			Path patches = base.dataroot.toPath().resolve(".patches");
+			Path patches = base.dataroot.toPath().resolve("patches");
 
 			if (!Files.exists(patches))
 				Files.createDirectories(patches);
