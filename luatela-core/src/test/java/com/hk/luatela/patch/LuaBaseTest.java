@@ -116,4 +116,19 @@ public class LuaBaseTest
 
 		assertSame(txt, export.toLua(txt));
 	}
+
+	@Test
+	public void testJustPatchUnchanged() throws FileNotFoundException, DatabaseException
+	{
+		File dataroot = new File(root, "base-just-patch-unchanged");
+
+		LuaBase base = new LuaBase(dataroot);
+		assertEquals(1, base.loadPatches());
+		PatchComparison comparison = base.checkNew();
+		assertNotNull(comparison);
+		assertNull(comparison.attemptCompare());
+		assertTrue(comparison.unchanged);
+
+		assertNotNull(base.patchModelSet.getModel("point"));
+	}
 }

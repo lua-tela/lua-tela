@@ -61,8 +61,15 @@ public abstract class PatchCommand extends Installer.Command
 
 	void loadPatches(LuaBase base)
 	{
-		int patches = base.loadPatches();
-		System.out.println("Loaded " + patches + " patch" + (patches == 1 ? "." : "es."));
+		try
+		{
+			int patches = base.loadPatches();
+			System.out.println("Loaded " + patches + " patch" + (patches == 1 ? "." : "es."));
+		}
+		catch (DatabaseException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	PatchComparison getComparison(LuaBase base)

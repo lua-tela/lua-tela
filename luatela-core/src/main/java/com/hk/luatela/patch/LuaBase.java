@@ -9,9 +9,14 @@ import com.hk.luatela.patch.models.ModelSet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.text.DateFormat;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LuaBase
 {
@@ -33,7 +38,7 @@ public class LuaBase
 		this.connection = connection;
 	}
 
-	public int loadPatches()
+	public int loadPatches() throws DatabaseException
 	{
 		if(patchModelSet != null)
 			throw new IllegalStateException("Already loaded patchy model set");
@@ -50,21 +55,11 @@ public class LuaBase
 			return 0;
 		}
 
-		File[] patches = patchesDir.listFiles();
-
-		if(patches != null && patches.length > 0)
-		{
-			LuaInterpreter interp = Lua.interpreter();
-
-			// one by one, apply patches to fresh model set
-			// compare to newly read model set, and recreate patch
-			for(File patch : patches)
-				throw new Error("APPLY PATCHES TOGETHER");
-		}
+		int count = applyPatches(patchModelSet, patchesDir);
 
 		patchModelSet.endStitch();
 
-		return patches != null ? patches.length : 0;
+		return count;
 	}
 
 	public PatchComparison checkNew() throws FileNotFoundException, DatabaseException
@@ -75,6 +70,11 @@ public class LuaBase
 			throw new FileNotFoundException(models.getAbsolutePath() + " (models.lua required for db)");
 
 		return new PatchComparison(this, modelSet = loadModelSet(models));
+	}
+
+	public ModelSet getModelSet()
+	{
+		return modelSet;
 	}
 
 	static ModelSet importModelSet(ModelSet modelSet, File models) throws FileNotFoundException, DatabaseException
@@ -106,9 +106,39 @@ public class LuaBase
 		return importModelSet(new ModelSet(), models);
 	}
 
-	public ModelSet getModelSet()
+	static int applyPatches(ModelSet set, File dir) throws DatabaseException
 	{
-		return modelSet;
+		Pattern patchName = Pattern.compile("patch-(\\d+)[-\\w]*\\.lua");
+		File[] files = Objects.requireNonNull(dir.listFiles());
+
+		Map<Integer, File> patches = new TreeMap<>();
+
+		int patchNo;
+		Matcher matcher;
+		for(File file : files)
+		{
+			matcher = patchName.matcher(file.getName().toLowerCase());
+			if(matcher.matches())
+			{
+				patchNo = Integer.parseInt(matcher.group(1));
+
+				if(patches.containsKey(patchNo))
+					throw new DatabaseException("Duplicate patch number: " + file);
+
+				patches.put(patchNo, file);
+			}
+		}
+
+		if(patches.isEmpty())
+			return 0;
+
+
+		for (Map.Entry<Integer, File> entry : patches.entrySet())
+		{
+			System.out.println(entry.getValue() + " (#" + entry.getKey() + ")");
+		}
+
+		return 0;
 	}
 
 	public static final DateFormat FULL_FORMAT = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL);
