@@ -62,7 +62,7 @@ public class LuaTela
 		registration.setLoadOnStartup(1);
 		registration.addMapping("/" + resourcePath + "/*");
 
-		this.routes = new Routes(this, dataRoot.resolve("routes.lua"));
+		this.routes = new Routes(this::injectInto, dataRoot.resolve("routes.lua"));
 
 		context.setAttribute(QUALIKEY, this);
 	}
@@ -81,13 +81,11 @@ public class LuaTela
 		interp.setExtra(QUALIKEY, this);
 
 		interp.importLib(new LuaLibrary<>("context", ContextLibrary.class));
-/*
-		Environment globals = interp.getGlobals();
 
-		globals.setVar("dataroot", Lua.newFunc((interp1, args) -> Lua.newString(dataRoot.toString())));
-		globals.setVar("resourceroot", Lua.newFunc((interp1, args) -> Lua.newString(resourceRoot.toString())));
-*/
-
+//		Environment globals = interp.getGlobals();
+//
+//		globals.setVar("dataroot", Lua.newFunc((interp1, args) -> Lua.newString(dataRoot.toString())));
+//		globals.setVar("resourceroot", Lua.newFunc((interp1, args) -> Lua.newString(resourceRoot.toString())));
 	}
 
 	private Path getFile(ServletContext context, String name, boolean required)

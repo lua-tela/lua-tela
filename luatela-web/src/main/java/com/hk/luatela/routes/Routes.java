@@ -1,27 +1,25 @@
 package com.hk.luatela.routes;
 
+import com.hk.array.Concat;
 import com.hk.collections.lists.SortedList;
-import com.hk.lua.Lua;
-import com.hk.lua.LuaException;
-import com.hk.lua.LuaInterpreter;
-import com.hk.lua.LuaLibrary;
+import com.hk.lua.*;
 import com.hk.luatela.InitializationException;
 import com.hk.luatela.LuaContext;
-import com.hk.luatela.LuaTela;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 public class Routes
 {
-	public final LuaTela luaTela;
 	private final SortedList<Route> routeSet;
+	final Consumer<LuaInterpreter> preparer;
 
-	public Routes(LuaTela luaTela, Path routesPath)
+	public Routes(Consumer<LuaInterpreter> preparer, Path routesPath)
 	{
-		this.luaTela = luaTela;
+		this.preparer = preparer;
 		if(!Files.exists(routesPath))
 			throw new InitializationException("'routes.lua' not found in data root directory (" + routesPath.getParent() + ")");
 
@@ -43,15 +41,13 @@ public class Routes
 		}
 
 		LuaLibrary.importStandard(interp);
-		interp.importLib(new LuaLibrary<>(null, RouteLibrary.class));
+		interp.getGlobals().setVar("path", Lua.newFunc(RoutePath::new));
 
-		luaTela.injectInto(interp);
+		preparer.accept(interp);
 
 		interp.setExtra("routes", this);
 
 		routeSet = new SortedList<>(new Route.Comp());
-
-		//this is my test
 
 		try
 		{
@@ -87,5 +83,41 @@ public class Routes
 	boolean newRoute(Route route)
 	{
 		return routeSet.add(route);
+	}
+
+	static class RoutePath extends LuaUserdata
+	{
+		private final String path;
+
+		RoutePath(LuaInterpreter interp, LuaObject[] objs)
+		{
+			StringBuilder sb = new StringBuilder();
+
+			for(LuaObject obj : objs)
+			{
+				if(obj.isString() || obj.isNumber() || obj instanceof RoutePath)
+					sb.append(obj.getString(interp));
+			}
+
+			path = sb.toString();
+		}
+
+		@Override
+		public String name()
+		{
+			return "*PATH";
+		}
+
+		@Override
+		public String getUserdata()
+		{
+			return path;
+		}
+
+		@Override
+		public String getString(LuaInterpreter interp)
+		{
+			return path;
+		}
 	}
 }

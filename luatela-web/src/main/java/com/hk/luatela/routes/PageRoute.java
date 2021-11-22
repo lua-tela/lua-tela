@@ -19,9 +19,9 @@ class PageRoute extends Route
 	private final LuaFactory factory;
 	public final String path;
 
-	PageRoute(LuaTela luaTela, String path, Path source)
+	PageRoute(Routes routes, String path, Path source)
 	{
-		super(luaTela);
+		super(routes);
 		this.path = path;
 		System.out.println("Mapping '" + path + "' to " + source);
 
@@ -56,7 +56,7 @@ class PageRoute extends Route
 		interp.setExtra("context", context);
 
 		LuaLibrary.importStandard(interp);
-		luaTela.injectInto(interp);
+		routes.preparer.accept(interp);
 		interp.importLib(new LuaLibrary<>("html", HTMLLibrary.class));
 		interp.importLib(new LuaLibrary<>("request", RequestLibrary.class));
 		interp.importLib(new LuaLibrary<>("response", ResponseLibrary.class));

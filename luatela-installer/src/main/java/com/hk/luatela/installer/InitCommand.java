@@ -121,7 +121,7 @@ public class InitCommand extends Installer.Command
 		txt.prln("Parameters:").tabUp();
 		String str;
 
-		txt.prln("--dataroot").tabUp();
+		txt.prln("--dataroot [data root directory]").tabUp();
 		str = "This parameter will specify the directory where the " +
 				"files will be generated. Also called the " +
 				"'init directory'. If not specified, then it will " +

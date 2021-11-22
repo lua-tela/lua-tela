@@ -146,7 +146,7 @@ public class MakeScriptCommand extends Installer.Command
 
 		if(unix)
 		{
-			txt.prln("--target").tabUp();
+			txt.prln("--target [env]").tabUp();
 			str = "This parameter will set the bash header location. " +
 					"This specifies the text after the '#!' on the " +
 					"first line. By default it is '/usr/bin/env bash'.";
@@ -154,7 +154,7 @@ public class MakeScriptCommand extends Installer.Command
 				txt.prln(line);
 			txt.tabDown();
 		}
-		txt.prln("--filename").tabUp();
+		txt.prln("--filename [name]").tabUp();
 		str = "This parameter will specify the name of the script " +
 				"when writing to the file. By default, the file name " +
 				"is 'luatela' with the extension being OS dependant.";
@@ -162,7 +162,7 @@ public class MakeScriptCommand extends Installer.Command
 			txt.prln(line);
 		txt.tabDown();
 
-		txt.prln("--directory").tabUp();
+		txt.prln("--directory [dir to place file]").tabUp();
 		str = "This parameter will specify the directory where the " +
 				"script will be generated. It should be the current " +
 				"directory since this is where the 'jar' file would " +
@@ -171,7 +171,7 @@ public class MakeScriptCommand extends Installer.Command
 			txt.prln(line);
 		txt.tabDown();
 
-		txt.prln("--dataroot").tabUp();
+		txt.prln("--dataroot [data root directory]").tabUp();
 		str = "This parameter will specify the dataroot directory " +
 				"which is used in various places in Lua Tela. It " +
 				"can be set as a system property within the script " +

@@ -16,11 +16,11 @@ import java.util.Comparator;
 
 public abstract class Route
 {
-	protected final LuaTela luaTela;
+	protected final Routes routes;
 
-	Route(LuaTela luaTela)
+	Route(Routes routes)
 	{
-		this.luaTela = luaTela;
+		this.routes = routes;
 	}
 
 	abstract boolean matches(String url, String ctx, String path);
