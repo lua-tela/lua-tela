@@ -1,6 +1,5 @@
 package com.hk.luatela.routes;
 
-import com.hk.array.Concat;
 import com.hk.collections.lists.SortedList;
 import com.hk.lua.*;
 import com.hk.luatela.InitializationException;
@@ -14,19 +13,22 @@ import java.util.function.Consumer;
 
 public class Routes
 {
+	private final Path dataroot;
 	private final SortedList<Route> routeSet;
 	final Consumer<LuaInterpreter> preparer;
 
 	public Routes(Consumer<LuaInterpreter> preparer, Path routesPath)
 	{
+		dataroot = routesPath.getParent();
 		this.preparer = preparer;
+		String source = routesPath.getFileName().toString();
 		if(!Files.exists(routesPath))
-			throw new InitializationException("'routes.lua' not found in data root directory (" + routesPath.getParent() + ")");
+			throw new InitializationException("'" + source + "' not found in data root directory (" + routesPath.getParent() + ")");
 
 		LuaInterpreter interp;
 		try
 		{
-			interp = Lua.reader(Files.newBufferedReader(routesPath), "routes.lua");
+			interp = Lua.reader(Files.newBufferedReader(routesPath), source);
 
 			interp.compile();
 		}
@@ -41,6 +43,8 @@ public class Routes
 		}
 
 		LuaLibrary.importStandard(interp);
+
+		interp.setExtra("dataroot", dataroot);
 		interp.getGlobals().setVar("path", Lua.newFunc(RoutePath::new));
 
 		preparer.accept(interp);
@@ -83,41 +87,5 @@ public class Routes
 	boolean newRoute(Route route)
 	{
 		return routeSet.add(route);
-	}
-
-	static class RoutePath extends LuaUserdata
-	{
-		private final String path;
-
-		RoutePath(LuaInterpreter interp, LuaObject[] objs)
-		{
-			StringBuilder sb = new StringBuilder();
-
-			for(LuaObject obj : objs)
-			{
-				if(obj.isString() || obj.isNumber() || obj instanceof RoutePath)
-					sb.append(obj.getString(interp));
-			}
-
-			path = sb.toString();
-		}
-
-		@Override
-		public String name()
-		{
-			return "*PATH";
-		}
-
-		@Override
-		public String getUserdata()
-		{
-			return path;
-		}
-
-		@Override
-		public String getString(LuaInterpreter interp)
-		{
-			return path;
-		}
 	}
 }
