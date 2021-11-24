@@ -1,7 +1,5 @@
 package com.hk.luatela;
 
-import com.hk.lua.Environment;
-import com.hk.lua.Lua;
 import com.hk.lua.LuaInterpreter;
 import com.hk.lua.LuaLibrary;
 import com.hk.luatela.luacompat.ContextLibrary;
@@ -62,9 +60,14 @@ public class LuaTela
 		registration.setLoadOnStartup(1);
 		registration.addMapping("/" + resourcePath + "/*");
 
-		this.routes = new Routes(this::injectInto, dataRoot.resolve("routes.lua"));
+		routes = new Routes(this::injectInto, dataRoot.resolve("routes.lua"));
 
 		context.setAttribute(QUALIKEY, this);
+	}
+
+	public void collectRoutes(PrintStream out)
+	{
+		routes.collect(out);
 	}
 
 	public void output(PrintStream out)

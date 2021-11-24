@@ -3,15 +3,10 @@ package com.hk.luatela.routes;
 import com.hk.lua.LuaInterpreter;
 import com.hk.lua.LuaObject;
 import com.hk.luatela.LuaContext;
-import com.hk.luatela.LuaTela;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.Comparator;
 
 public abstract class Route
@@ -26,6 +21,16 @@ public abstract class Route
 	abstract boolean matches(String url, String ctx, String path);
 
 	abstract void serve(LuaContext context) throws ServletException, IOException;
+
+	boolean hasPath()
+	{
+		return false;
+	}
+
+	String getPath()
+	{
+		return null;
+	}
 
 	static void handle(LuaInterpreter interp, LuaObject obj, PrintWriter writer, String path) throws IOException
 	{
@@ -70,8 +75,8 @@ public abstract class Route
 		@Override
 		public int compare(Route o1, Route o2)
 		{
-			if(o1 instanceof PageRoute && o2 instanceof PageRoute)
-				return Integer.compare(((PageRoute) o2).path.length(), ((PageRoute) o1).path.length());
+			if(o1.hasPath() && o2.hasPath())
+				return Integer.compare(o2.getPath().length(), o1.getPath().length());
 			else
 				throw new Error("should not be possible (yet)");
 		}

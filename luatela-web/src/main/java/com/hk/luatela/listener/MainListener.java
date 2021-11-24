@@ -12,6 +12,7 @@ public class MainListener implements ServletContextListener
 	{
 		LuaTela luaTela = new LuaTela(event.getServletContext());
 
+		luaTela.collectRoutes(System.out);
 		luaTela.output(System.out);
 
 		System.out.println("############## START UP ##############");

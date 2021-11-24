@@ -1,12 +1,16 @@
 package com.hk.luatela.routes;
 
 import com.hk.collections.lists.SortedList;
+import com.hk.io.IOUtil;
 import com.hk.lua.*;
 import com.hk.luatela.InitializationException;
 import com.hk.luatela.LuaContext;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -15,6 +19,8 @@ public class Routes
 {
 	private final Path dataroot;
 	private final SortedList<Route> routeSet;
+	private LuaInterpreter interp;
+	PrintStream out;
 	final Consumer<LuaInterpreter> preparer;
 
 	public Routes(Consumer<LuaInterpreter> preparer, Path routesPath)
@@ -25,7 +31,6 @@ public class Routes
 		if(!Files.exists(routesPath))
 			throw new InitializationException("'" + source + "' not found in data root directory (" + routesPath.getParent() + ")");
 
-		LuaInterpreter interp;
 		try
 		{
 			interp = Lua.reader(Files.newBufferedReader(routesPath), source);
@@ -44,15 +49,17 @@ public class Routes
 
 		LuaLibrary.importStandard(interp);
 
+		interp.setExtra("routes", this);
 		interp.setExtra("dataroot", dataroot);
 		interp.getGlobals().setVar("path", Lua.newFunc(RoutePath::new));
 
-		preparer.accept(interp);
-
-		interp.setExtra("routes", this);
-
 		routeSet = new SortedList<>(new Route.Comp());
+	}
 
+	public void collect(PrintStream out)
+	{
+		this.out = out;
+		preparer.accept(interp);
 		try
 		{
 			interp.execute();
@@ -61,6 +68,11 @@ public class Routes
 		{
 			ex.printStackTrace();
 			throw new InitializationException();
+		}
+		finally
+		{
+			this.out = null;
+			interp = null;
 		}
 	}
 
