@@ -49,6 +49,7 @@ public class RoutesTest
 				"Mapping '/pages/hamlet' to src\\test\\resources\\routes\\pages\\hamlet.lua\n" +
 				"Mapping '/ham-let' to src\\test\\resources\\routes\\pages\\hamlet.lua\n" +
 				"Mapping '/index' to template at src\\test\\resources\\routes\\templates\\index.lua.html\n";
-		assertEquals(expected, str);
+		expected = expected.replace("\\", "(\\\\|/)");
+		assertTrue(str.matches(expected));
 	}
 }
