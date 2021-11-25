@@ -40,8 +40,8 @@ public class LuaContext
 
 	public LuaObject getFileTable(LuaInterpreter interp)
 	{
-		Path dataRoot = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class).dataRoot;
-		File uploads = dataRoot.resolve("uploads").toFile();
+		Path dataroot = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class).dataroot;
+		File uploads = dataroot.resolve("uploads").toFile();
 		LuaObject tbl = Lua.newTable();
 		try
 		{

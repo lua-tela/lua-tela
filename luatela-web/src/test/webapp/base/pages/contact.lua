@@ -1,13 +1,15 @@
+local somedata = require 'libs/somedata.lua'
+
 local txt = html.create()
 txt:prln("<!DOCTYPE html>")
 
 txt:open("html")
 txt:open("head")
-txt:el("title", "Hello World!")
+txt:el("title", somedata.title())
 txt:close("head")
 txt:open("body")
-txt:prln("This is my line, there are many like it but this one is mine.")
-txt:el("magic", nil, "number", "27913")
+txt:prln(somedata.mywhat('line'))
+txt:el("magic", nil, "number", tostring(somedata.magicnumber()))
 txt:close("body")
 txt:close("html")
 return txt

@@ -88,7 +88,7 @@ public class FileUpload extends LuaUserdata
 		if(args.length >= 1 && args[0] instanceof FileUpload)
 		{
 			FileUpload fu = (FileUpload) args[0];
-			Path dataRoot = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class).dataRoot;
+			Path dataRoot = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class).dataroot;
 			File uploads = dataRoot.resolve("uploads").toFile();
 
 			File saveTo;

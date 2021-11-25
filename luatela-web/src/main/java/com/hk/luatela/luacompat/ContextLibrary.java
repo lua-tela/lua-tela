@@ -35,7 +35,7 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
             String str = args[0].getString();
             if(str.startsWith("/") || str.startsWith("\\") || str.startsWith(File.separator))
                 str = str.substring(1);
-            return Lua.newString(luaTela.dataRoot.resolve(str).toString());
+            return Lua.newString(luaTela.dataroot.resolve(str).toString());
         }
     },
     resPath() {

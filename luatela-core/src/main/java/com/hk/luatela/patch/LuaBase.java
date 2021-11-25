@@ -1,14 +1,14 @@
 package com.hk.luatela.patch;
 
-import com.hk.lua.Lua;
-import com.hk.lua.LuaException;
-import com.hk.lua.LuaInterpreter;
-import com.hk.lua.LuaLibrary;
+import com.hk.lua.*;
 import com.hk.luatela.patch.models.ModelLibrary;
 import com.hk.luatela.patch.models.ModelSet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.text.DateFormat;
 import java.util.Map;
@@ -75,6 +75,26 @@ public class LuaBase
 		return modelSet;
 	}
 
+	public static void injectRequire(LuaInterpreter interp, Path dataroot)
+	{
+		interp.getGlobals().setVar("require", Lua.newFunc((interp1, args) -> {
+			Lua.checkArgs("require", args, LuaType.STRING);
+			String src = args[0].getString();
+
+			LuaObject result = Lua.nil();
+			try
+			{
+				result = interp1.require(src, Files.newBufferedReader(dataroot.resolve(src)));
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+
+			return result;
+		}));
+	}
+
 	static ModelSet importModelSet(ModelSet modelSet, File models) throws FileNotFoundException, DatabaseException
 	{
 		LuaInterpreter interp = Lua.reader(models);
@@ -82,6 +102,7 @@ public class LuaBase
 		interp.setExtra(ModelSet.KEY, modelSet);
 
 		LuaLibrary.importStandard(interp);
+		injectRequire(interp, models.getParentFile().toPath());
 
 		interp.importLib(new LuaLibrary<>(null, ModelLibrary.class));
 

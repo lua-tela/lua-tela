@@ -3,13 +3,17 @@ package com.hk.luatela;
 import com.hk.lua.LuaInterpreter;
 import com.hk.lua.LuaLibrary;
 import com.hk.luatela.luacompat.ContextLibrary;
+import com.hk.luatela.patch.DatabaseException;
+import com.hk.luatela.patch.LuaBase;
 import com.hk.luatela.routes.Routes;
 import com.hk.luatela.servlet.ResourceServlet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -17,9 +21,10 @@ import java.nio.file.Paths;
 
 public class LuaTela
 {
+	public final LuaBase base;
 	public final ServletContext context;
 	public final String resourcePath;
-	public final Path dataRoot, resourceRoot;
+	public final Path dataroot, resourceRoot;
 	public final Routes routes;
 
 	public LuaTela(ServletContext context)
@@ -29,7 +34,7 @@ public class LuaTela
 
 		this.context = context;
 
-		dataRoot = getFile(context, "dataroot", true);
+		dataroot = getFile(context, "dataroot", true);
 
 		String resourcePath = context.getInitParameter("resourcepath");
 
@@ -51,7 +56,7 @@ public class LuaTela
 		Path resourceRoot = getFile(context, "resourceroot", false);
 
 		if(resourceRoot == null)
-			resourceRoot = dataRoot.resolve(resourcePath);
+			resourceRoot = dataroot.resolve(resourcePath);
 
 		this.resourceRoot = resourceRoot;
 
@@ -60,19 +65,50 @@ public class LuaTela
 		registration.setLoadOnStartup(1);
 		registration.addMapping("/" + resourcePath + "/*");
 
-		routes = new Routes(this::injectInto, dataRoot.resolve("routes.lua"));
+		routes = new Routes(this::injectInto, dataroot.resolve("routes.lua"));
 
 		context.setAttribute(QUALIKEY, this);
+
+		try
+		{
+			base = new LuaBase(dataroot.toFile());
+		}
+		catch (FileNotFoundException e)
+		{
+			throw new UncheckedIOException(e);
+		}
 	}
 
-	public void collectRoutes(PrintStream out)
+	public void initialize(PrintStream out)
 	{
 		routes.collect(out);
-	}
 
-	public void output(PrintStream out)
-	{
-		out.println("Using Data-Root: \"" + dataRoot + "\"");
+		int patches;
+		try
+		{
+			patches = base.loadPatches();
+		}
+		catch (DatabaseException e)
+		{
+			throw new InitializationException(e);
+		}
+
+		out.println("Loaded " + patches + " patch" + (patches == 1 ? "." : "es."));
+
+		try
+		{
+			base.checkNew();
+		}
+		catch (FileNotFoundException e)
+		{
+			throw new InitializationException("'models.lua' not found in dataroot directory: " + dataroot, e);
+		}
+		catch (DatabaseException e)
+		{
+			throw new InitializationException(e);
+		}
+
+		out.println("Using Data-Root: \"" + dataroot + "\"");
 		out.println("Using Resource-Root: \"" + resourceRoot + "\"");
 		out.println("Using Resource-Path: \"" + resourcePath + "\"");
 		out.print("Loaded " + routes.size());
@@ -81,6 +117,7 @@ public class LuaTela
 
 	public void injectInto(LuaInterpreter interp)
 	{
+		LuaBase.injectRequire(interp, dataroot);
 		interp.setExtra(QUALIKEY, this);
 
 		interp.importLib(new LuaLibrary<>("context", ContextLibrary.class));
