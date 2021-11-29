@@ -19,28 +19,29 @@ path('/johndoe-homepage', path('/contact', '-me')):topage('johndoepage')
 --- request table
 local requestPth = path('/request')
 
-requestPth:path('/get'):topage()
-requestPth:path('/post'):topage()
-requestPth:path('/paths'):topage()
-requestPth:path('/sessions'):topage()
-requestPth:path('/files'):topage()
-requestPth:path('/headers'):topage()
+requestPth:path('/get'):topage() -- 20000
+requestPth:path('/post'):topage() -- 21000
+requestPth:path('/paths'):topage() -- 30000
+requestPth:path('/sessions'):topage() -- 40000
+requestPth:path('/files'):topage() -- 10000
+requestPth:path('/headers'):topage() -- 70000
+requestPth:path('/body'):topage() -- 17000
 
 local responsePth = path('/response')
 
-responsePth:path('/content-type'):topage()
-responsePth:path('/content-size'):topage()
-responsePth:path('/headers'):topage()
-responsePth:path('/status'):topage()
-responsePth:path('/serve'):topage()
-responsePth:path('/redirects'):topage()
+responsePth:path('/content-type'):topage() -- 60000
+responsePth:path('/content-size'):topage() -- 50000
+responsePth:path('/headers'):topage() -- 80000
+responsePth:path('/status'):topage() -- 90000
+responsePth:path('/serve'):topage() -- 11000
+responsePth:path('/redirects'):topage() -- 12000
 
 local contextPth = path('/context')
 
-contextPth:path('/paths'):topage()
-contextPth:path('/attributes'):topage()
-contextPth:path('/mime-type'):topage()
-contextPth:path('/escaping'):topage()
+contextPth:path('/paths'):topage() -- 13000
+contextPth:path('/attributes'):topage() -- 14000
+contextPth:path('/mime-type'):topage() -- 15000
+contextPth:path('/escaping'):topage() -- 16000
 
 local templatesPth = path('/templates')
 

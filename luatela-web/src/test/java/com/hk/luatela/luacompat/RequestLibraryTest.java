@@ -1,5 +1,8 @@
 package com.hk.luatela.luacompat;
 
+import com.hk.json.Json;
+import com.hk.json.JsonArray;
+import com.hk.json.JsonObject;
 import com.hk.luatela.LuaTelaTest;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -18,6 +21,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static org.junit.Assert.*;
 
@@ -304,6 +309,106 @@ public class RequestLibraryTest
 
 		assertEquals(200, response.getStatusLine().getStatusCode());
 		assertEquals(Integer.toString(70005), EntityUtils.toString(response.getEntity()));
+	}
+
+	@Test
+	public void testBody() throws IOException
+	{
+		HttpGet getRequest;
+		HttpPost request;
+		HttpResponse response;
+
+		getRequest = new HttpGet("/request/body");
+		response = client.execute(LuaTelaTest.config, getRequest);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("17000", EntityUtils.toString(response.getEntity()));
+
+		request = new HttpPost("/request/body/string1");
+		request.setEntity(new StringEntity("this is my string"));
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("17001", EntityUtils.toString(response.getEntity()));
+
+		request = new HttpPost("/request/body/string2");
+		request.setEntity(new StringEntity("quavo, offset, and takeoff"));
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("17002", EntityUtils.toString(response.getEntity()));
+
+		request = new HttpPost("/request/body/tostring1");
+		request.setEntity(new StringEntity("this is my string"));
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("17003", EntityUtils.toString(response.getEntity()));
+
+		request = new HttpPost("/request/body/tostring2");
+		request.setEntity(new StringEntity("quavo, offset, and takeoff"));
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("17004", EntityUtils.toString(response.getEntity()));
+
+		request = new HttpPost("/request/body/toreader");
+		request.setEntity(new StringEntity("but it's tru tho\nikno it's tru tho\nrep the north like I'm Trudeau"));
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("17005", EntityUtils.toString(response.getEntity()));
+
+		String lyrics = "I miss the old Kanye, straight from the 'Go Kanye\n" +
+				"Chop up the soul Kanye, set on his goals Kanye\n" +
+				"I hate the new Kanye, the bad mood Kanye\n" +
+				"The always rude Kanye, spaz in the news Kanye\n" +
+				"I miss the sweet Kanye, chop up the beats Kanye\n" +
+				"I gotta to say at that time I'd like to meet Kanye\n" +
+				"See I invented Kanye, it wasn't any Kanyes\n" +
+				"And now I look and look around and there's so many Kanyes\n" +
+				"I used to love Kanye, I used to love Kanye\n" +
+				"I even had the pink polo, I thought I was Kanye\n" +
+				"What if Kanye made a song about Kanye\n" +
+				"Called \"I Miss The Old Kanye, \" man that would be so Kanye\n" +
+				"That's all it was Kanye, we still love Kanye\n" +
+				"And I love you like Kanye loves Kanye";
+		request = new HttpPost("/request/body/tofile");
+		request.setEntity(new StringEntity(lyrics));
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("17006", EntityUtils.toString(response.getEntity()));
+
+		getRequest = new HttpGet("/res/rap.txt");
+		response = client.execute(LuaTelaTest.config, getRequest);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(lyrics, EntityUtils.toString(response.getEntity()));
+
+		assertTrue(Files.deleteIfExists(Paths.get("src/test/webapp/base/res/rap.txt")));
+
+		request = new HttpPost("/request/body/json");
+		JsonObject obj = new JsonObject();
+		obj.put("title", "The Shawshank Redemption");
+		obj.put("director", "Frank Darabont");
+		obj.put("screenplay", "Stephen King");
+		obj.put("releasedate", "September 22, 1994");
+
+		JsonArray arr = new JsonArray();
+		arr.add("Morgan Freeman");
+		arr.add("Tim Robbins");
+		arr.add("Clancy Brown");
+		arr.add("Bob Gunton");
+		arr.add("James Whitmore");
+		obj.put("cast", arr);
+		// Movie, Film, Financial, Result, Performance, Budget, Gross, Earnings, Sales, Revenue, Box Office, Daily, Weekend, Weekly, Records, Opening Weekend, Profitability, Domestic, International, Worldwide, Overseas, Foreign, DVD, Blu-ray, Theatrical, Summary
+
+		request.setEntity(new StringEntity(Json.write(obj)));
+		response = client.execute(LuaTelaTest.config, request);
+
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals("17007", EntityUtils.toString(response.getEntity()));
 	}
 
 	@After

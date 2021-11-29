@@ -1,13 +1,19 @@
 package com.hk.luatela.luacompat;
 
 import com.hk.func.BiConsumer;
+import com.hk.io.IOUtil;
 import com.hk.lua.*;
 import com.hk.luatela.LuaContext;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @SuppressWarnings({"unused", "unchecked"})
@@ -19,7 +25,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, name(), Lua.newString(ctx.request.getRemoteHost()));
+				table.rawSet(name(), Lua.newString(ctx.request.getRemoteHost()));
 		}
 	},
 	port() {
@@ -28,7 +34,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, name(), Lua.newNumber(ctx.request.getRemotePort()));
+				table.rawSet(name(), Lua.newNumber(ctx.request.getRemotePort()));
 		}
 	},
 	user() {
@@ -37,7 +43,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, name(), Lua.newString(ctx.request.getRemoteUser()));
+				table.rawSet(name(), Lua.newString(ctx.request.getRemoteUser()));
 		}
 	},
 	address() {
@@ -46,7 +52,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, name(), Lua.newString(ctx.request.getRemoteAddr()));
+				table.rawSet(name(), Lua.newString(ctx.request.getRemoteAddr()));
 		}
 	},
 	method() {
@@ -55,7 +61,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, name(), Lua.newString(ctx.method));
+				table.rawSet(name(), Lua.newString(ctx.method));
 		}
 	},
 	url() {
@@ -64,7 +70,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, name(), Lua.newString(ctx.url));
+				table.rawSet(name(), Lua.newString(ctx.url));
 		}
 	},
 	ctx() {
@@ -73,7 +79,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, name(), Lua.newString(ctx.ctx));
+				table.rawSet(name(), Lua.newString(ctx.ctx));
 		}
 	},
 	path() {
@@ -82,7 +88,15 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			if(ctx != null)
-				table.setIndex(env.interp, name(), Lua.newString(ctx.path));
+				table.rawSet(name(), Lua.newString(ctx.path));
+		}
+	},
+	body() {
+		@Override
+		public void accept(Environment env, LuaObject table)
+		{
+			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
+			table.rawSet(name(), bodyTable(ctx));
 		}
 	},
 	isNewSess() {
@@ -213,7 +227,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 			LuaObject tbl = ctx.getFileTable(env.interp);
 			if(tbl != null)
-				table.setIndex(env.interp, name(), tbl);
+				table.rawSet(name(), tbl);
 		}
 	},
 	GET() {
@@ -247,10 +261,10 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			for (Map.Entry<String, List<LuaObject>> entry : map.entrySet())
 			{
 				arr = entry.getValue().toArray(new LuaObject[0]);
-				tbl.rawSet(entry.getKey(), arr.length == 0 ? arr[0] : Lua.newVarargs(arr));
+				tbl.rawSet(entry.getKey(), arr.length == 1 ? arr[0] : Lua.newVarargs(arr));
 			}
 
-			table.setIndex(env.interp, name(), tbl);
+			table.rawSet(name(), tbl);
 
 			LuaObject metatable = Lua.newTable();
 
@@ -306,7 +320,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 				}
 			}
 
-			table.setIndex(env.interp, name(), tbl);
+			table.rawSet(name(), tbl);
 		}
 	};
 
@@ -321,7 +335,101 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 	{
 		String name = toString();
 		if(name != null && !name.trim().isEmpty())
-			table.setIndex(env.interp, name, Lua.newFunc(this));
+			table.rawSet(name, Lua.newFunc(this));
+	}
+
+	private static LuaObject bodyTable(LuaContext ctx)
+	{
+		HttpServletRequest request = ctx.request;
+		LuaObject table = Lua.newTable();
+
+		LuaObject func = Lua.newFunc((interp, args) -> {
+			if(table.rawGet("used").getBoolean())
+				throw new LuaException("request body already used!");
+			table.rawSet("used", "string");
+
+			try
+			{
+				CharArrayWriter wtr = new CharArrayWriter();
+				Reader rdr = request.getReader();
+				char[] cs = new char[512];
+				int len;
+				while((len = rdr.read(cs)) > 0)
+					wtr.write(cs, 0, len);
+
+				return Lua.newString(wtr.toString());
+			}
+			catch (IOException e)
+			{
+				throw new UncheckedIOException(e);
+			}
+		});
+		table.rawSet("tostring", func);
+		table.rawSet("toreader", Lua.newFunc((interp, args) -> {
+			if(table.rawGet("used").getBoolean())
+				throw new LuaException("request body already used!");
+			table.rawSet("used", "reader");
+
+			try
+			{
+				return new LuaReader(request.getReader());
+			}
+			catch (IOException e)
+			{
+				throw new UncheckedIOException(e);
+			}
+		}));
+		table.rawSet("tofile", Lua.newFunc((interp, args) -> {
+			Lua.checkArgs("tofile", args, LuaType.STRING);
+
+			try
+			{
+				if(table.rawGet("used").getBoolean())
+					throw new LuaException("request body already used!");
+				table.rawSet("used", "file");
+
+				Path path = Paths.get(args[0].getString());
+				if(!path.isAbsolute())
+					path = ctx.luaTela.dataroot.resolve(path);
+
+				OutputStream out = Files.newOutputStream(path);
+				InputStream in = request.getInputStream();
+				byte[] arr = new byte[1024];
+				int read, sum = 0;
+
+				while ((read = in.read(arr)) != -1)
+				{
+					out.write(arr, 0, read);
+					sum += read;
+				}
+
+				return Lua.newNumber(sum);
+			}
+			catch (IOException e)
+			{
+				throw new UncheckedIOException(e);
+			}
+		}));
+		table.rawSet("used", Lua.newBoolean(false));
+//		table.rawSet("tojson", Lua.newFunc((interp, args) -> {
+//			if(table.rawGet("used").getBoolean())
+//				throw new LuaException("request body already used!");
+//			table.rawSet("used", "json");
+//
+//			args = new LuaObject[0];
+//			args = new LuaObject[] { func.call(interp, args) };
+//			return LuaLibraryJson.read.call(interp, args);
+//		}));
+
+		LuaObject metatable = Lua.newTable();
+
+//		metatable.rawSet("__name", "*REQUEST_BODY");
+		metatable.rawSet("__index", metatable);
+		metatable.rawSet("__tostring", func);
+
+		table.setMetatable(metatable);
+
+		return table;
 	}
 
 	private static Object toObj(LuaObject val)
