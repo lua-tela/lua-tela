@@ -34,7 +34,7 @@ public class PatchUpCommand extends PatchCommand
 			return;
 		}
 
-		PatchExport export = comparison.export();
+		PatchExport export = comparison.export(base);
 
 		HTMLText txt = export.toLua(new HTMLText());
 

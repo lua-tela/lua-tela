@@ -67,7 +67,7 @@ public class LuaBase
 		if(!models.exists())
 			throw new FileNotFoundException(models.getAbsolutePath() + " (models.lua required for db)");
 
-		return new PatchComparison(this, modelSet = loadModelSet(models));
+		return new PatchComparison(patchModelSet, modelSet = loadModelSet(models));
 	}
 
 	public ModelSet getModelSet()

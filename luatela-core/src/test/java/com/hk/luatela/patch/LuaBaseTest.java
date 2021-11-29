@@ -110,7 +110,7 @@ public class LuaBaseTest
 
 		assertFalse(new File(dataroot, "patches").exists());
 
-		PatchExport export = comparison.export();
+		PatchExport export = comparison.export(base);
 		assertNotNull(export);
 
 		String exportName = export.getName();

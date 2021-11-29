@@ -7,15 +7,13 @@ import java.io.PrintStream;
 
 public class PatchComparison
 {
-	private final LuaBase base;
 	private final ModelSet before, after;
 	public boolean unchanged = false;
 	public Model[] newModels;
 
-	public PatchComparison(LuaBase base, ModelSet after)
+	public PatchComparison(ModelSet before, ModelSet after)
 	{
-		this.before = base.patchModelSet;
-		this.base = base;
+		this.before = before;
 		this.after = after;
 	}
 
@@ -45,7 +43,7 @@ public class PatchComparison
 		return null;
 	}
 
-	public PatchExport export()
+	public PatchExport export(LuaBase base)
 	{
 		return new PatchExport(base, this);
 	}

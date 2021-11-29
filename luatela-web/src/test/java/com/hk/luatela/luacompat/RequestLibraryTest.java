@@ -375,11 +375,15 @@ public class RequestLibraryTest
 				"And I love you like Kanye loves Kanye";
 		request = new HttpPost("/request/body/tofile");
 		request.setEntity(new StringEntity(lyrics));
+		// these lyrics are uploaded to the server which in turn saves
+		// it to a resource file under rap.txt
 		response = client.execute(LuaTelaTest.config, request);
 
 		assertEquals(200, response.getStatusLine().getStatusCode());
 		assertEquals("17006", EntityUtils.toString(response.getEntity()));
 
+		// we can then retrieve this resource file to compare content
+		// >:D
 		getRequest = new HttpGet("/res/rap.txt");
 		response = client.execute(LuaTelaTest.config, getRequest);
 
@@ -402,7 +406,6 @@ public class RequestLibraryTest
 		arr.add("Bob Gunton");
 		arr.add("James Whitmore");
 		obj.put("cast", arr);
-		// Movie, Film, Financial, Result, Performance, Budget, Gross, Earnings, Sales, Revenue, Box Office, Daily, Weekend, Weekly, Records, Opening Weekend, Profitability, Domestic, International, Worldwide, Overseas, Foreign, DVD, Blu-ray, Theatrical, Summary
 
 		request.setEntity(new StringEntity(Json.write(obj)));
 		response = client.execute(LuaTelaTest.config, request);
