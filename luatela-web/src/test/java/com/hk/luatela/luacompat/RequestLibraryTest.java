@@ -392,7 +392,7 @@ public class RequestLibraryTest
 
 		assertTrue(Files.deleteIfExists(Paths.get("src/test/webapp/base/res/rap.txt")));
 
-		request = new HttpPost("/request/body/json");
+		request = new HttpPost("/request/body/tojson");
 		JsonObject obj = new JsonObject();
 		obj.put("title", "The Shawshank Redemption");
 		obj.put("director", "Frank Darabont");

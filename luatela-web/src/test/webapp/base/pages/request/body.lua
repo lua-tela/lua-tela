@@ -100,8 +100,20 @@ elseif url == '/tofile' then
     assert(err:find('.*already used.*'))
 
     return 17006
-elseif url == '/json' then
-    local movie = json.read(tostring(request.body))
+elseif url == '/tojson' then
+    assert(not request.body.used)
+
+    local movie = request.body.tojson()
+    assert(request.body.used == 'json')
+
+    local function dofail()
+        request.body.tojson()
+        return true
+    end
+
+    local res, err = pcall(dofail)
+    assert(not res)
+    assert(err:find('.*already used.*'))
 
     assert(movie.title == 'The Shawshank Redemption')
     assert(movie.director == 'Frank Darabont')

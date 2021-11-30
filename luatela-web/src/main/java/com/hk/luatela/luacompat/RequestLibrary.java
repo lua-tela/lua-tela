@@ -1,7 +1,7 @@
 package com.hk.luatela.luacompat;
 
 import com.hk.func.BiConsumer;
-import com.hk.io.IOUtil;
+import com.hk.json.Json;
 import com.hk.lua.*;
 import com.hk.luatela.LuaContext;
 import org.apache.http.NameValuePair;
@@ -104,7 +104,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		public LuaObject call(LuaInterpreter interp, LuaObject[] args)
 		{
 			LuaContext ctx = interp.getExtra("context", LuaContext.class);
-			return Lua.newBoolean(ctx.request.getSession().isNew());
+			return Lua.newBool(ctx.request.getSession().isNew());
 		}
 
 		@Override
@@ -128,7 +128,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			LuaContext ctx = interp.getExtra("context", LuaContext.class);
 			Map<String, Object> map =
 					(Map<String, Object>) ctx.request.getSession().getAttribute("lua");
-			return Lua.newBoolean(map.containsKey(args[0].getString()));
+			return Lua.newBool(map.containsKey(args[0].getString()));
 		}
 	},
 	getSess() {
@@ -153,7 +153,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			Map<String, Object> map =
 					(Map<String, Object>) ctx.request.getSession().getAttribute("lua");
 			map.put(args[0].getString(), toObj(args[1]));
-			return Lua.newBoolean(true);
+			return Lua.TRUE;
 		}
 	},
 	removeSess() {
@@ -167,12 +167,12 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			{
 				Lua.checkArgs(name(), args, LuaType.STRING);
 				Object obj = map.remove(args[0].getString());
-				return obj == null ? Lua.nil() : Lua.newLuaObject(obj);
+				return obj == null ? Lua.NIL : Lua.newLuaObject(obj);
 			}
 			else
 				ctx.request.getSession().invalidate();
 
-			return Lua.newBoolean(true);
+			return Lua.TRUE;
 		}
 	},
 	getSessID() {
@@ -197,7 +197,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		public LuaObject call(LuaInterpreter interp, LuaObject[] args)
 		{
 			LuaContext ctx = interp.getExtra("context", LuaContext.class);
-			LuaObject tbl = Lua.nil();
+			LuaObject tbl = Lua.NIL;
 			Enumeration<String> values;
 			if(args.length == 0)
 			{
@@ -246,7 +246,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			{
 				list = map.get(pair.getName());
 				if(pair.getValue() == null)
-					val = Lua.newBoolean(true);
+					val = Lua.TRUE;
 				else
 					val = Lua.newString(pair.getValue());
 
@@ -281,7 +281,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		{
 			LuaContext ctx = env.interp.getExtra("context", LuaContext.class);
 
-			LuaObject tbl = Lua.nil();
+			LuaObject tbl = Lua.NIL;
 
 			if(env.interp.hasExtra("post"))
 			{
@@ -304,7 +304,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 					switch (arr.length)
 					{
 					case 0:
-						tbl.rawSet(entry.getKey(), Lua.newBoolean(true));
+						tbl.rawSet(entry.getKey(), Lua.TRUE);
 						break;
 					case 1:
 						tbl.rawSet(entry.getKey(), Lua.newString(arr[0]));
@@ -410,16 +410,21 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 				throw new UncheckedIOException(e);
 			}
 		}));
-		table.rawSet("used", Lua.newBoolean(false));
-//		table.rawSet("tojson", Lua.newFunc((interp, args) -> {
-//			if(table.rawGet("used").getBoolean())
-//				throw new LuaException("request body already used!");
-//			table.rawSet("used", "json");
-//
-//			args = new LuaObject[0];
-//			args = new LuaObject[] { func.call(interp, args) };
-//			return LuaLibraryJson.read.call(interp, args);
-//		}));
+		table.rawSet("used", Lua.FALSE);
+		table.rawSet("tojson", Lua.newFunc((interp, args) -> {
+			if(table.rawGet("used").getBoolean())
+				throw new LuaException("request body already used!");
+			table.rawSet("used", "json");
+
+			try
+			{
+				return LuaLibraryJson.toLua(Json.read(request.getReader()));
+			}
+			catch (IOException e)
+			{
+				throw new UncheckedIOException(e);
+			}
+		}));
 
 		LuaObject metatable = Lua.newTable();
 
