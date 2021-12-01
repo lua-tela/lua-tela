@@ -2,7 +2,6 @@ package com.hk.luatela.installer;
 
 import com.hk.luatela.patch.LuaBase;
 
-import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -55,7 +54,8 @@ public class Installer
 			do {
 				System.out.print("cmd: ");
 
-				command = nextLine().trim();
+				command = nextLine();
+				command = command != null ? command.trim() : "";
 
 				if (command.isEmpty())
 					continue;
@@ -339,20 +339,10 @@ public class Installer
 				System.out.println("\t" + command);
 			System.out.println("\texit/close");
 		}
-
-		@Override
-		public void close() {}
 	}
 
 	static abstract class Command
 	{
-		protected final Scanner in;
-
-		Command()
-		{
-			this.in = Installer.in;
-		}
-
 		abstract void execute(LinkedList<String> arguments);
 
 		abstract void help();

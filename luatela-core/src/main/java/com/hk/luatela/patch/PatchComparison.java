@@ -3,8 +3,6 @@ package com.hk.luatela.patch;
 import com.hk.luatela.patch.models.Model;
 import com.hk.luatela.patch.models.ModelSet;
 
-import java.io.PrintStream;
-
 public class PatchComparison
 {
 	private final ModelSet before, after;

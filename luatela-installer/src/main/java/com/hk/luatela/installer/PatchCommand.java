@@ -7,7 +7,6 @@ import com.hk.str.HTMLText;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.UncheckedIOException;
 import java.util.LinkedList;
 
 import static com.hk.luatela.installer.Installer.splitToLinesByLen;

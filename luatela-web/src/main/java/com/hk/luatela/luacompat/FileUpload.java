@@ -95,7 +95,7 @@ public class FileUpload extends LuaUserdata
 			if(args.length >= 2)
 			{
 				if(!args[1].isString())
-					throw new LuaException("bad argument #2 to 'toFile' (expected string, got " + (args.length >= 2 ? args[1].name() : "nil") + ")");
+					throw new LuaException("bad argument #2 to 'toFile' (expected string, got " + args[1].name() + ")");
 				String s = args[1].getString();
 
 				if(Paths.get(s).isAbsolute())
@@ -112,7 +112,7 @@ public class FileUpload extends LuaUserdata
 			try
 			{
 				fu.fi.write(saveTo);
-				return Lua.newBoolean(true);
+				return null;
 			}
 			catch (Exception ex)
 			{
@@ -134,7 +134,7 @@ public class FileUpload extends LuaUserdata
 			}
 			catch (Exception ex)
 			{
-				return Lua.newVarargs(Lua.nil(), Lua.newString(ex.getLocalizedMessage()));
+				return Lua.newVarargs(Lua.NIL, Lua.newString(ex.getLocalizedMessage()));
 			}
 		}
 		else

@@ -3,15 +3,11 @@ package com.hk.luatela.routes;
 import com.hk.lua.*;
 import com.hk.luatela.InitializationException;
 import com.hk.luatela.LuaContext;
-import com.hk.luatela.LuaTela;
 import com.hk.luatela.luacompat.HTMLLibrary;
 import com.hk.luatela.luacompat.RequestLibrary;
 import com.hk.luatela.luacompat.ResponseLibrary;
 
-import javax.servlet.ServletOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.nio.file.Path;
 
 class SingleRoute extends Route
@@ -79,7 +75,7 @@ class SingleRoute extends Route
 
 		interp.setExtra("context", context);
 
-		LuaLibrary.importStandard(interp);
+		Lua.importStandard(interp);
 		routes.preparer.accept(interp);
 		interp.importLib(new LuaLibrary<>("html", HTMLLibrary.class));
 		interp.importLib(new LuaLibrary<>("request", RequestLibrary.class));

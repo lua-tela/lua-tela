@@ -6,6 +6,7 @@ import com.hk.str.HTMLText;
 
 import java.util.*;
 
+@SuppressWarnings("unused")
 public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMethod
 {
 	create() {
@@ -153,14 +154,14 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 		htmlMetatable.rawSet("hasVar", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("hasVar", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
-				return Lua.newBoolean(args[0].getUserdata(HTMLText.class).hasVar(args[1].getString()));
+				return Lua.newBool(args[0].getUserdata(HTMLText.class).hasVar(args[1].getString()));
 			else
 				throw new LuaException("bad argument #1 to 'hasVar' (HTMLText* expected, got " + args[0].name() + ")");
 		}));
 		htmlMetatable.rawSet("isBlocking", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("isBlocking", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
-				return Lua.newBoolean(args[0].getUserdata(HTMLText.class).isBlocking());
+				return Lua.newBool(args[0].getUserdata(HTMLText.class).isBlocking());
 			else
 				throw new LuaException("bad argument #1 to 'isBlocking' (HTMLText* expected, got " + args[0].name() + ")");
 		}));

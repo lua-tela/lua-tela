@@ -5,7 +5,6 @@ import com.hk.luatela.InitializationException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 class RoutePath extends LuaUserdata
 {

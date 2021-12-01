@@ -4,8 +4,6 @@ import com.hk.luatela.patch.PatchComparison;
 import com.hk.luatela.patch.models.Model;
 import com.hk.str.HTMLText;
 
-import static com.hk.luatela.installer.Installer.splitToLinesByLen;
-
 public class PatchCompareCommand extends PatchCommand
 {
 	@Override

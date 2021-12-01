@@ -1,13 +1,11 @@
 package com.hk.luatela;
 
-import com.hk.io.IOUtil;
 import com.hk.json.Json;
 import com.hk.json.JsonObject;
 import com.hk.json.JsonValue;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;

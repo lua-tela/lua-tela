@@ -17,16 +17,7 @@ public class LuaTemplate
         factory = rdr.compile();
         factory.compile();
 
-        factory.addLibrary(LuaLibrary.BASIC);
-        factory.addLibrary(LuaLibrary.COROUTINE);
-        factory.addLibrary(LuaLibrary.STRING);
-        factory.addLibrary(LuaLibrary.TABLE);
-        factory.addLibrary(LuaLibrary.MATH);
-        factory.addLibrary(LuaLibrary.IO);
-        factory.addLibrary(LuaLibrary.OS);
-        factory.addLibrary(LuaLibrary.JSON);
-        factory.addLibrary(LuaLibrary.HASH);
-        factory.addLibrary(LuaLibrary.DATE);
+        Lua.importStandard(factory);
     }
 
     public LuaInterpreter create(Writer writer)

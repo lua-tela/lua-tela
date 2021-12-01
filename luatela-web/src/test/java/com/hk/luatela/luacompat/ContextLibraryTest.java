@@ -18,7 +18,7 @@ public class ContextLibraryTest
     private HttpClient client;
 
     @Before
-    public void setUp() throws Exception
+    public void setUp()
     {
         client = HttpClients.createDefault();
     }

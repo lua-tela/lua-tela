@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 

@@ -3,7 +3,6 @@ package com.hk.luatela.patch.models.fields;
 import com.hk.lua.LuaException;
 import com.hk.lua.LuaObject;
 import com.hk.luatela.patch.models.Model;
-import com.hk.str.HTMLText;
 
 import java.util.Map;
 

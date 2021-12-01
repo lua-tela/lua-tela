@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class MainServlet extends HttpServlet
 {
@@ -20,12 +19,12 @@ public class MainServlet extends HttpServlet
 		if(request.getRequestURI().equals("/favicon.ico") && method.equals("get"))
 		{
 			Path path = luaTela.resourceRoot.resolve("favicon.ico");
-			ResourceServlet.serveFile(getServletContext(), request, response, path);
+			ResourceServlet.serveFile(getServletContext(), response, path);
 		}
 		else if(request.getRequestURI().equals("/robots.txt") && method.equals("get"))
 		{
 			Path path = luaTela.resourceRoot.resolve("robots.txt");
-			ResourceServlet.serveFile(getServletContext(), request, response, path);
+			ResourceServlet.serveFile(getServletContext(), response, path);
 		}
 		else
 		{

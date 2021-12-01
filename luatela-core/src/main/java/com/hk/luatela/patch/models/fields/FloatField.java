@@ -1,6 +1,5 @@
 package com.hk.luatela.patch.models.fields;
 
-import com.hk.lua.LuaObject;
 import com.hk.luatela.patch.models.Model;
 
 public class FloatField extends DataField

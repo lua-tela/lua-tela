@@ -59,7 +59,7 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
 
             LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
             Map<String, LuaObject> map = (Map<String, LuaObject>) luaTela.context.getAttribute("lua");
-            return Lua.newBoolean(map.containsKey(args[0].getString()));
+            return Lua.newBool(map.containsKey(args[0].getString()));
         }
     },
     getAttr() {
@@ -120,7 +120,7 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
             LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
             Map<String, LuaObject> map = (Map<String, LuaObject>) luaTela.context.getAttribute("lua");
             LuaObject obj = map.remove(args[0].getString());
-            return obj == null ? Lua.nil() : obj;
+            return obj == null ? Lua.NIL : obj;
         }
     },
     escapeHTML() {

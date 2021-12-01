@@ -1,13 +1,11 @@
 package com.hk.luatela.patch;
 
 import com.hk.luatela.patch.models.ModelSet;
-import com.hk.str.HTMLText;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.UncheckedIOException;
 
 import static org.junit.Assert.*;
 

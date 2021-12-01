@@ -8,9 +8,7 @@ import com.hk.luatela.patch.DatabaseException;
 import com.hk.luatela.patch.models.fields.DataField;
 import com.hk.luatela.patch.models.fields.IDField;
 
-import javax.xml.crypto.Data;
 import java.util.*;
-import java.util.function.Predicate;
 
 public class Model extends LuaUserdata
 {
@@ -51,7 +49,7 @@ public class Model extends LuaUserdata
 				throw new DatabaseException("Expected table to have the __builder attached to construct field");
 
 			DataField.Builder builder = (DataField.Builder) obj;
-			value.rawSet("__builder", Lua.nil());
+			value.rawSet("__builder", Lua.NIL);
 			DataField field = builder.provide(this, name, value);
 
 			if(field.isPrimary())
@@ -82,15 +80,6 @@ public class Model extends LuaUserdata
 	public List<DataField> getFields()
 	{
 		return Collections.unmodifiableList(fields);
-	}
-
-	public void iterateFields(Predicate<DataField> predicate)
-	{
-		for(DataField field : fields)
-		{
-			if(predicate.test(field))
-				break;
-		}
 	}
 
 	@Override

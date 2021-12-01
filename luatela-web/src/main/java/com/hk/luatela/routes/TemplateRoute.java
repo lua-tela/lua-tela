@@ -11,7 +11,6 @@ import com.hk.luatela.luacompat.LuaTemplate;
 import com.hk.luatela.luacompat.RequestLibrary;
 import com.hk.luatela.luacompat.ResponseLibrary;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -20,14 +19,12 @@ import java.nio.file.Path;
 public class TemplateRoute extends Route
 {
 	public final String path;
-	private final Path source;
 	private final LuaTemplate template;
 
 	public TemplateRoute(Routes routes, String path, Path template)
 	{
 		super(routes);
 		this.path = path;
-		this.source = template;
 		routes.out.println("Mapping '" + path + "' to template at " + template);
 
 		try
@@ -71,7 +68,7 @@ public class TemplateRoute extends Route
 		LuaInterpreter interp = template.create(writer);
 		interp.setExtra("context", context);
 
-//		LuaLibrary.importStandard(interp);
+//		Lua.importStandard(interp);
 		routes.preparer.accept(interp);
 		interp.importLib(new LuaLibrary<>("html", HTMLLibrary.class));
 		interp.importLib(new LuaLibrary<>("request", RequestLibrary.class));

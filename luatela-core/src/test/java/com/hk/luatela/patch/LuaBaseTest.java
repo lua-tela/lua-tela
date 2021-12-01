@@ -12,7 +12,6 @@ import com.hk.luatela.patch.models.fields.IDField;
 import com.hk.luatela.patch.models.fields.StringField;
 import com.hk.str.HTMLText;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -148,12 +147,12 @@ public class LuaBaseTest
 
 		interp.setExtra(ModelSet.KEY, modelSet);
 
-		LuaLibrary.importStandard(interp);
+		Lua.importStandard(interp);
 
 		interp.importLib(new LuaLibrary<>(null, ModelLibrary.class));
 
 		interp.compile();
 
-		assertEquals(Lua.newBoolean(true), interp.execute());
+		assertEquals(Lua.TRUE, interp.execute());
 	}
 }

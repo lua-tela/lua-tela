@@ -5,13 +5,10 @@ import com.hk.lua.*;
 import com.hk.luatela.LuaContext;
 import com.hk.luatela.servlet.ResourceServlet;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @SuppressWarnings("unused")
 public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMethod
@@ -25,7 +22,7 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
 
             ctx.response.setContentType(args[0].getString());
 
-            return Lua.newBoolean(true);
+            return Lua.TRUE;
         }
 
         @Override
@@ -47,7 +44,7 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
 
             ctx.response.setCharacterEncoding(args[0].getString());
 
-            return Lua.newBoolean(true);
+            return Lua.TRUE;
         }
     },
     setContentSize() {
@@ -59,7 +56,7 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
 
             ctx.response.setContentLengthLong(args[0].getInteger());
 
-            return Lua.newBoolean(true);
+            return Lua.TRUE;
         }
     },
     setHeader() {
@@ -70,7 +67,7 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
             LuaContext ctx = interp.getExtra("context", LuaContext.class);
 
             ctx.response.setHeader(args[0].getString(), args[1].getString());
-            return Lua.newBoolean(true);
+            return Lua.TRUE;
         }
     },
     setStatus() {
@@ -81,7 +78,7 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
             LuaContext ctx = interp.getExtra("context", LuaContext.class);
 
             ctx.response.setStatus((int) args[0].getInteger());
-            return Lua.newBoolean(true);
+            return Lua.TRUE;
         }
     },
     serve() {
@@ -109,9 +106,9 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
                     str = str.substring(1);
                 
                 Path path = ctx.luaTela.resourceRoot.resolve(str);
-                return Lua.newBoolean(ResourceServlet.serveFile(
-                        ctx.luaTela.context, ctx.request,
-                        ctx.response, path, contentType));
+                return Lua.newBool(ResourceServlet.serveFile(
+                        ctx.luaTela.context, ctx.response,
+                        path, contentType));
             }
             catch (IOException ex)
             {
@@ -135,7 +132,7 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
                 throw new UncheckedIOException(ex);
             }
 
-            return Lua.newBoolean(true);
+            return Lua.TRUE;
         }
     };
 

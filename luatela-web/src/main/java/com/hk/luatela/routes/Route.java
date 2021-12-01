@@ -32,7 +32,7 @@ public abstract class Route
 		return null;
 	}
 
-	static void handle(LuaInterpreter interp, LuaObject obj, PrintWriter writer, String path) throws IOException
+	static void handle(LuaInterpreter interp, LuaObject obj, PrintWriter writer, String path)
 	{
 		if(obj.isFunction())
 		{

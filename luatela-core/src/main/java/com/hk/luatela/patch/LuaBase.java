@@ -81,7 +81,7 @@ public class LuaBase
 			Lua.checkArgs("require", args, LuaType.STRING);
 			String src = args[0].getString();
 
-			LuaObject result = Lua.nil();
+			LuaObject result = Lua.NIL;
 			try
 			{
 				result = interp1.require(src, Files.newBufferedReader(dataroot.resolve(src)));
@@ -101,7 +101,7 @@ public class LuaBase
 
 		interp.setExtra(ModelSet.KEY, modelSet);
 
-		LuaLibrary.importStandard(interp);
+		Lua.importStandard(interp);
 		injectRequire(interp, models.getParentFile().toPath());
 
 		interp.importLib(new LuaLibrary<>(null, ModelLibrary.class));

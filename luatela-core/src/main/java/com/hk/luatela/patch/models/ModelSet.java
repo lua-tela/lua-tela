@@ -1,6 +1,5 @@
 package com.hk.luatela.patch.models;
 
-import com.hk.lua.LuaInterpreter;
 import com.hk.luatela.patch.DatabaseException;
 
 import java.util.HashMap;
@@ -44,11 +43,6 @@ public class ModelSet implements Iterable<Model>
 	public void endStitch()
 	{
 		patchCount = -patchCount;
-	}
-
-	public boolean isPatchy()
-	{
-		return patchCount >= 0;
 	}
 
 	public int getPatchCount()
