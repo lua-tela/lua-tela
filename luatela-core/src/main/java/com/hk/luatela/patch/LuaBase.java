@@ -21,8 +21,7 @@ public class LuaBase
 {
 	public final File dataroot;
 	private Connection connection;
-	ModelSet patchModelSet;
-	private ModelSet modelSet;
+	private ModelSet patchModelSet, modelSet;
 
 	public LuaBase(File dataroot) throws FileNotFoundException
 	{
@@ -68,6 +67,11 @@ public class LuaBase
 			throw new FileNotFoundException(models.getAbsolutePath() + " (models.lua required for db)");
 
 		return new PatchComparison(patchModelSet, modelSet = loadModelSet(models));
+	}
+
+	public ModelSet getPatchModelSet()
+	{
+		return patchModelSet;
 	}
 
 	public ModelSet getModelSet()
@@ -150,6 +154,8 @@ public class LuaBase
 
 		if(patches.isEmpty())
 			return 0;
+
+		LuaInterpreter interp = Lua.interpreter();
 
 		for (Map.Entry<Integer, File> entry : patches.entrySet())
 		{

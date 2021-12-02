@@ -41,9 +41,9 @@ public class PatchComparison
 		return null;
 	}
 
-	public PatchExport export(LuaBase base)
+	public PatchExport export(int patchCount)
 	{
-		return new PatchExport(base, this);
+		return new PatchExport(patchCount, this);
 	}
 
 	public interface Decision

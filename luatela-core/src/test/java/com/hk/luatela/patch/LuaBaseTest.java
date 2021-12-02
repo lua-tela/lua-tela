@@ -109,7 +109,7 @@ public class LuaBaseTest
 
 		assertFalse(new File(dataroot, "patches").exists());
 
-		PatchExport export = comparison.export(base);
+		PatchExport export = comparison.export(base.getPatchModelSet().getPatchCount());
 		assertNotNull(export);
 
 		String exportName = export.getName();
@@ -124,16 +124,16 @@ public class LuaBaseTest
 	@Test
 	public void testJustPatchUnchanged() throws FileNotFoundException, DatabaseException
 	{
-//		File dataroot = new File(root, "base-just-patch-unchanged");
-//
-//		LuaBase base = new LuaBase(dataroot);
-//		assertEquals(1, base.loadPatches());
-//		PatchComparison comparison = base.checkNew();
-//		assertNotNull(comparison);
-//		assertNull(comparison.attemptCompare());
-//		assertTrue(comparison.unchanged);
-//
-//		assertNotNull(base.patchModelSet.getModel("point"));
+		File dataroot = new File(root, "base-just-patch-unchanged");
+
+		LuaBase base = new LuaBase(dataroot);
+		assertEquals(1, base.loadPatches());
+		PatchComparison comparison = base.checkNew();
+		assertNotNull(comparison);
+		assertNull(comparison.attemptCompare());
+		assertTrue(comparison.unchanged);
+
+		assertNotNull(base.getPatchModelSet().getModel("point"));
 	}
 
 	@Test

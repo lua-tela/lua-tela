@@ -46,28 +46,6 @@ public class PatchComparisonTest {
 		assertEquals(1, comparison.newModels.length);
 		assertEquals("point", comparison.newModels[0].name);
 		assertEquals(3, comparison.newModels[0].getFields().size());
-
-//		TODO: SHOULD GO IN PatchExportTest
-//		LuaBase base = new LuaBase(modelDir);
-//		base.patchModelSet = new ModelSet();
-//		base.patchModelSet.startStitch();
-//		base.patchModelSet.endStitch();
-//
-//		PatchExport export = comparison.export(base);
-//		assertNotNull(export);
-//
-//		String exportName = export.getName();
-//		assertNotNull(exportName);
-//
-//		assertTrue(exportName.startsWith("patch-1"));
-//
-//		HTMLText txt = new HTMLText();
-//
-//		assertSame(txt, export.toLua(txt));
-//
-//		String code = txt.create();
-//
-//		assertTrue(code.contains("models['point'] ="));
 	}
 
 	@Test

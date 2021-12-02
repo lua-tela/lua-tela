@@ -15,7 +15,7 @@ import static com.hk.luatela.installer.Installer.splitToLinesByLen;
 
 public class PatchUpCommand extends PatchCommand
 {
-	private boolean print;
+	private boolean print, excludeHeader;
 
 	@Override
 	void getParams(LinkedList<String> arguments)
@@ -23,6 +23,7 @@ public class PatchUpCommand extends PatchCommand
 		super.getParams(arguments);
 
 		print = Installer.getFlag(arguments, "-print");
+		excludeHeader = Installer.getFlag(arguments, "-no-header");
 	}
 
 	@Override
@@ -34,7 +35,10 @@ public class PatchUpCommand extends PatchCommand
 			return;
 		}
 
-		PatchExport export = comparison.export(base);
+		PatchExport export = comparison.export(base.getPatchModelSet().getPatchCount());
+
+		if(excludeHeader)
+			export.excludeHeader();
 
 		HTMLText txt = export.toLua(new HTMLText());
 
@@ -85,6 +89,13 @@ public class PatchUpCommand extends PatchCommand
 		txt.prln("-print").tabUp();
 		str = "This flag will print the patch instead of attempting " +
 				"to write it to the patch file.";
+		for(String line : splitToLinesByLen(str, 50))
+			txt.prln(line);
+		txt.tabDown();
+
+		txt.prln("-no-header").tabUp();
+		str = "This flag will exclude the commented header that is " +
+				"generated at the top of the code.";
 		for(String line : splitToLinesByLen(str, 50))
 			txt.prln(line);
 		txt.tabDown();
