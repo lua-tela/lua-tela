@@ -52,15 +52,20 @@ public class PatchExport
 		txt.tabDown().prln("end");
 		txt.prln("patchNo = patchNo + 1").ln();
 
-		if(comparison.newModels != null && comparison.newModels.length > 0)
+		if(comparison.addedModels != null && !comparison.addedModels.isEmpty())
 		{
-//			txt.prln("do").tabUp();
-			for (Model newModel : comparison.newModels)
+			for (Model newModel : comparison.addedModels)
 			{
 				txt.pr("models['").wr(newModel.name).wrln("'] = {}");
 				toLua(txt, newModel.getFields());
 			}
-//			txt.tabDown().prln("end");
+			txt.ln();
+		}
+
+		if(comparison.removedModels != null && !comparison.removedModels.isEmpty())
+		{
+			for (Model newModel : comparison.removedModels)
+				txt.pr("models['").wr(newModel.name).wrln("'] = nil");
 			txt.ln();
 		}
 

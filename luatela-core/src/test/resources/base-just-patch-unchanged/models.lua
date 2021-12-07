@@ -1,5 +1,5 @@
 Point = model 'point' {
-    x = field 'float' {},
-    y = field 'float' {},
-    z = field 'float' {}
+    x = field 'float' { primary=true },
+    y = field 'float' { primary=true },
+    z = field 'float' { primary=true }
 }

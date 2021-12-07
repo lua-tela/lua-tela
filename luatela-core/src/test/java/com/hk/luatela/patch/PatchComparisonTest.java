@@ -29,11 +29,12 @@ public class PatchComparisonTest {
 
 		assertNull(comparison.attemptCompare());
 		assertFalse(comparison.unchanged);
+		assertTrue(comparison.removedModels.isEmpty());
+		assertTrue(comparison.renamedModels.isEmpty());
 
-		assertNotNull(comparison.newModels);
-		assertEquals(1, comparison.newModels.length);
-		assertEquals("student_grade", comparison.newModels[0].name);
-		assertEquals(6, comparison.newModels[0].getFields().size());
+		assertNotNull(comparison.addedModels);
+		assertEquals(1, comparison.addedModels.size());
+		assertEquals("student_grade", comparison.addedModels.get(0).name);
 
 		notEmptySet = LuaBase.loadModelSet(new File(modelDir, "single_model.lua"));
 
@@ -42,10 +43,9 @@ public class PatchComparisonTest {
 		assertNull(comparison.attemptCompare());
 		assertFalse(comparison.unchanged);
 
-		assertNotNull(comparison.newModels);
-		assertEquals(1, comparison.newModels.length);
-		assertEquals("point", comparison.newModels[0].name);
-		assertEquals(3, comparison.newModels[0].getFields().size());
+		assertNotNull(comparison.addedModels);
+		assertEquals(1, comparison.addedModels.size());
+		assertEquals("point", comparison.addedModels.get(0).name);
 	}
 
 	@Test
@@ -60,12 +60,14 @@ public class PatchComparisonTest {
 
 		assertNull(comparison.attemptCompare());
 		assertFalse(comparison.unchanged);
+		assertTrue(comparison.removedModels.isEmpty());
+		assertTrue(comparison.renamedModels.isEmpty());
 
-		assertNotNull(comparison.newModels);
-		assertEquals(3, comparison.newModels.length);
-		assertEquals("test_model1", comparison.newModels[0].name);
-		assertEquals("test_model2", comparison.newModels[1].name);
-		assertEquals("test_model3", comparison.newModels[2].name);
+		assertNotNull(comparison.addedModels);
+		assertEquals(3, comparison.addedModels.size());
+		assertEquals("test_model1", comparison.addedModels.get(0).name);
+		assertEquals("test_model2", comparison.addedModels.get(1).name);
+		assertEquals("test_model3", comparison.addedModels.get(2).name);
 	}
 
 	@Test
@@ -79,7 +81,34 @@ public class PatchComparisonTest {
 
 		comparison = new PatchComparison(singleModel, doubleModel);
 
-//		assertNotNull(comparison.attemptCompare());
-//		assertFalse(comparison.unchanged);
+		assertNull(comparison.attemptCompare());
+		assertFalse(comparison.unchanged);
+		assertTrue(comparison.removedModels.isEmpty());
+		assertTrue(comparison.renamedModels.isEmpty());
+
+		assertNotNull(comparison.addedModels);
+		assertEquals(1, comparison.addedModels.size());
+		assertEquals("rectangle", comparison.addedModels.get(0).name);
+	}
+
+	@Test
+	public void testTwoToOneModels() throws FileNotFoundException, DatabaseException
+	{
+		ModelSet singleModel, doubleModel;
+		PatchComparison comparison;
+
+		singleModel = LuaBase.loadModelSet(new File(modelDir, "single_model.lua"));
+		doubleModel = LuaBase.loadModelSet(new File(modelDir, "double_model.lua"));
+
+		comparison = new PatchComparison(doubleModel, singleModel);
+
+		assertNull(comparison.attemptCompare());
+		assertFalse(comparison.unchanged);
+		assertTrue(comparison.addedModels.isEmpty());
+		assertTrue(comparison.renamedModels.isEmpty());
+
+		assertNotNull(comparison.removedModels);
+		assertEquals(1, comparison.removedModels.size());
+		assertEquals("rectangle", comparison.removedModels.get(0).name);
 	}
 }

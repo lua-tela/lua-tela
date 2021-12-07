@@ -17,10 +17,10 @@ public class PatchCompareCommand extends PatchCommand
 			return;
 		}
 
-		if(comparison.newModels != null && comparison.newModels.length > 0)
+		if(comparison.addedModels != null && !comparison.addedModels.isEmpty())
 		{
-			System.out.println("Found " + comparison.newModels.length + " new model" + (comparison.newModels.length == 1 ? "" : "s"));
-			for (Model newModel : comparison.newModels)
+			System.out.println("Found " + comparison.addedModels.size() + " new model" + (comparison.addedModels.size() == 1 ? "" : "s"));
+			for (Model newModel : comparison.addedModels)
 				System.out.println("\t- " + newModel.name);
 		}
 

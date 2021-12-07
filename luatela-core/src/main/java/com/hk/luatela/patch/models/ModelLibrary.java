@@ -5,6 +5,7 @@ import com.hk.lua.*;
 import com.hk.luatela.patch.DatabaseException;
 import com.hk.luatela.patch.models.fields.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -65,23 +66,37 @@ public enum ModelLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaM
 	}
 
 	private static final Map<String, LuaObject> fields = new HashMap<>();
-
-	private static LuaObject builder(String name, BiFunction<Model, String, DataField> provider)
-	{
-		DataField.Builder builder = new DataField.Builder(name, provider);
-		return Lua.newFunc((interp, args) -> {
-			Lua.checkArgs(name, args, LuaType.TABLE);
-
-			args[0].rawSet("__builder", builder);
-			return args[0];
-		});
-	}
+	public static final Map<String, DataField.Builder> fieldBuilders;
 
 	static
 	{
-		fields.put("string", builder("string", StringField::new));
-		fields.put("float", builder("float", FloatField::new));
-		fields.put("integer", builder("integer", IntegerField::new));
-		fields.put("id", builder("id", IDField::new));
+		Map<String, DataField.Builder> builders = new HashMap<>();
+		DataField.Builder builder;
+
+		builder = new DataField.Builder("string", StringField::new);
+		builders.put("string", builder);
+
+		builder = new DataField.Builder("float", FloatField::new);
+		builders.put("float", builder);
+
+		builder = new DataField.Builder("integer", IntegerField::new);
+		builders.put("integer", builder);
+
+		builder = new DataField.Builder("id", IDField::new);
+		builders.put("id", builder);
+
+		fieldBuilders = Collections.unmodifiableMap(builders);
+
+		for(Map.Entry<String, DataField.Builder> entry : fieldBuilders.entrySet())
+		{
+			String k = entry.getKey();
+			DataField.Builder v = entry.getValue();
+			fields.put(k, Lua.newFunc((interp, args) -> {
+				Lua.checkArgs(k, args, LuaType.TABLE);
+
+				args[0].rawSet("__builder", v);
+				return args[0];
+			}));
+		}
 	}
 }

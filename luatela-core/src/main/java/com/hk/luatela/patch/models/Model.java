@@ -1,16 +1,13 @@
 package com.hk.luatela.patch.models;
 
-import com.hk.lua.Lua;
-import com.hk.lua.LuaInterpreter;
-import com.hk.lua.LuaObject;
-import com.hk.lua.LuaUserdata;
+import com.hk.lua.*;
 import com.hk.luatela.patch.DatabaseException;
 import com.hk.luatela.patch.models.fields.DataField;
 import com.hk.luatela.patch.models.fields.IDField;
 
 import java.util.*;
 
-public class Model extends LuaUserdata
+public final class Model extends LuaUserdata
 {
 	public final String name;
 	private final Map<String, DataField> fieldMap;
@@ -22,6 +19,29 @@ public class Model extends LuaUserdata
 		fieldMap = new LinkedHashMap<>();
 
 		set.addModel(this);
+	}
+
+	public void setFields(List<DataField> fields) throws DatabaseException
+	{
+		if(this.fields != null)
+			throw new DatabaseException("Unexpected call to set fields, already contains fields");
+
+		if(fields instanceof LinkedList)
+			this.fields = fields;
+		else
+			this.fields = new LinkedList<>(fields);
+
+		boolean hasPrimary = false;
+		for(DataField field : fields)
+		{
+			hasPrimary |= field.isPrimary();
+			fieldMap.put(field.name, field);
+		}
+
+		if(!hasPrimary)
+			throw new DatabaseException("Model '" + name + "' doesn't seem to have primary field");
+
+		Collections.sort(this.fields);
 	}
 
 	void readFields(LuaObject object) throws DatabaseException
@@ -60,14 +80,14 @@ public class Model extends LuaUserdata
 			fieldMap.put(name, field);
 		}
 
-		if(hasPrimary)
-			Collections.sort(fields);
-		else
+		if (!hasPrimary)
 		{
 			IDField idField = new IDField(this, "id", true);
 			fieldMap.put(idField.name, idField);
 			fields.addFirst(idField);
 		}
+		else
+			Collections.sort(fields);
 
 		this.fields = fields;
 	}
@@ -98,5 +118,26 @@ public class Model extends LuaUserdata
 	public String getString(LuaInterpreter interp)
 	{
 		return name;
+	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o)
+			return true;
+
+		if(o instanceof Model)
+		{
+			Model model = (Model) o;
+
+			return Objects.equals(name, model.name) && Objects.equals(fields, model.fields);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(name, fields);
 	}
 }

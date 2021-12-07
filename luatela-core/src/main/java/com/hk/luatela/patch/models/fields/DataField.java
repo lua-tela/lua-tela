@@ -6,6 +6,7 @@ import com.hk.lua.LuaUserdata;
 import com.hk.luatela.patch.models.Model;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 
 public abstract class DataField extends LuaUserdata implements Comparable<DataField>
@@ -57,6 +58,27 @@ public abstract class DataField extends LuaUserdata implements Comparable<DataFi
 	public int compareTo(DataField o)
 	{
 		return Boolean.compare(primary, o.primary);
+	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o)
+			return true;
+
+		if(o instanceof DataField)
+		{
+			DataField dataField = (DataField) o;
+
+			return primary == dataField.primary && Objects.equals(name, dataField.name);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(name, primary);
 	}
 
 	public static class Builder extends LuaUserdata

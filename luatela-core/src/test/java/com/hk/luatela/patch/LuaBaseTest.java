@@ -31,6 +31,26 @@ public class LuaBaseTest
 	}
 
 	@Test
+	public void testModelLibrary() throws FileNotFoundException
+	{
+		File file = new File(root, "model_library.lua");
+
+		ModelSet modelSet = new ModelSet();
+
+		LuaInterpreter interp = Lua.reader(file);
+
+		interp.setExtra(ModelSet.KEY, modelSet);
+
+		Lua.importStandard(interp);
+
+		interp.importLib(new LuaLibrary<>(null, ModelLibrary.class));
+
+		interp.compile();
+
+		assertEquals(Lua.TRUE, interp.execute());
+	}
+
+	@Test
 	public void testEmpty() throws FileNotFoundException, DatabaseException
 	{
 		File dataroot = new File(root, "base-empty");
@@ -71,54 +91,17 @@ public class LuaBaseTest
 		assertNull(comparison.attemptCompare());
 		assertFalse(comparison.unchanged);
 
-		assertNotNull(comparison.newModels);
-		assertEquals(1, comparison.newModels.length);
-		assertEquals("student_grade", comparison.newModels[0].name);
-		assertEquals(5 + 1, comparison.newModels[0].getFields().size());
+		assertNotNull(comparison.addedModels);
+		assertEquals(1, comparison.addedModels.size());
+		assertEquals("student_grade", comparison.addedModels.get(0).name);
 
-		ModelSet modelSet = base.getModelSet();
-		assertNotNull(modelSet);
-		assertEquals(1, modelSet.size());
+		assertNotNull(base.getModelSet());
+		assertEquals(1, base.getModelSet().size());
+		assertNotNull(base.getModelSet().getModel("student_grade"));
 
-		Model model = modelSet.getModel("student_grade");
-		assertNotNull(model);
-
-		Map<String, DataField> fieldMap = model.getFieldMap();
-		assertNotNull(fieldMap);
-
-		assertEquals(5 + 1, fieldMap.size());
-
-		assertTrue(fieldMap.get("id") instanceof IDField);
-
-		assertTrue(fieldMap.get("firstName") instanceof StringField);
-		assertEquals(64, ((StringField) fieldMap.get("firstName")).getMaxLength());
-
-		assertTrue(fieldMap.get("lastName") instanceof StringField);
-		assertEquals(64, ((StringField) fieldMap.get("lastName")).getMaxLength());
-
-		assertTrue(fieldMap.get("mathicsGrade") instanceof FloatField);
-		assertTrue(fieldMap.get("scienceGrade") instanceof FloatField);
-		assertTrue(fieldMap.get("englishGrade") instanceof FloatField);
-
-		assertTrue(fieldMap.get("id").isPrimary());
-		assertFalse(fieldMap.get("firstName").isPrimary());
-		assertFalse(fieldMap.get("lastName").isPrimary());
-		assertFalse(fieldMap.get("mathicsGrade").isPrimary());
-		assertFalse(fieldMap.get("scienceGrade").isPrimary());
-		assertFalse(fieldMap.get("englishGrade").isPrimary());
+		assertSame(base.getModelSet().getModel("student_grade"), comparison.addedModels.get(0));
 
 		assertFalse(new File(dataroot, "patches").exists());
-
-		PatchExport export = comparison.export(base.getPatchModelSet().getPatchCount());
-		assertNotNull(export);
-
-		String exportName = export.getName();
-		assertNotNull(exportName);
-		assertTrue(exportName.startsWith("patch-1"));
-
-		HTMLText txt = new HTMLText();
-
-		assertSame(txt, export.toLua(txt));
 	}
 
 	@Test
@@ -134,25 +117,5 @@ public class LuaBaseTest
 		assertTrue(comparison.unchanged);
 
 		assertNotNull(base.getPatchModelSet().getModel("point"));
-	}
-
-	@Test
-	public void testModelLibrary() throws FileNotFoundException
-	{
-		File file = new File(root, "model_library.lua");
-
-		ModelSet modelSet = new ModelSet();
-
-		LuaInterpreter interp = Lua.reader(file);
-
-		interp.setExtra(ModelSet.KEY, modelSet);
-
-		Lua.importStandard(interp);
-
-		interp.importLib(new LuaLibrary<>(null, ModelLibrary.class));
-
-		interp.compile();
-
-		assertEquals(Lua.TRUE, interp.execute());
 	}
 }

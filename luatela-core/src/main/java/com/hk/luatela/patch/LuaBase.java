@@ -1,19 +1,21 @@
 package com.hk.luatela.patch;
 
+import com.hk.file.FileUtil;
 import com.hk.lua.*;
+import com.hk.luatela.patch.models.Model;
 import com.hk.luatela.patch.models.ModelLibrary;
 import com.hk.luatela.patch.models.ModelSet;
+import com.hk.luatela.patch.models.fields.DataField;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.text.DateFormat;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -124,7 +126,7 @@ public class LuaBase
 		return modelSet;
 	}
 
-	static ModelSet loadModelSet(File models) throws FileNotFoundException, DatabaseException
+	public static ModelSet loadModelSet(File models) throws FileNotFoundException, DatabaseException
 	{
 		return importModelSet(new ModelSet(), models);
 	}
@@ -156,10 +158,71 @@ public class LuaBase
 			return 0;
 
 		LuaInterpreter interp = Lua.interpreter();
+		Lua.importStandard(interp);
 
-		for (Map.Entry<Integer, File> entry : patches.entrySet())
+		interp.getGlobals().setVar("models", Lua.newTable());
+		interp.getGlobals().setVar("patchNo", Lua.ONE);
+
+		try
 		{
-			System.out.println(entry.getValue() + " (#" + entry.getKey() + ")");
+			for (Map.Entry<Integer, File> entry : patches.entrySet())
+			{
+				if(!interp.require(new FileReader(entry.getValue())).getBoolean())
+					throw new DatabaseException("Patch #" + entry.getKey() + " returned a false value.");
+			}
+		}
+		catch (FileNotFoundException e)
+		{
+			throw new Error(); // shouldn't really be possible...
+		}
+
+		patchNo = (int) interp.getGlobals().getVar("patchNo").getInteger();
+		patchNo--;
+
+		if(patchNo != patches.size())
+		{
+			System.out.println("------------------- WARNING -------------------");
+			System.out.println("\tAmount of patch files doesn't match");
+			System.out.println("\tinternal patch number?");
+		}
+
+		LuaObject models = interp.getGlobals().getVar("models");
+
+		Model model;
+		DataField field;
+		LuaObject mdl, fld;
+		String fieldType;
+		for (Map.Entry<LuaObject, LuaObject> entry1 : models.getEntries())
+		{
+			mdl = entry1.getValue();
+
+			if(!entry1.getKey().isString())
+				throw new DatabaseException("Expected key of 'models' table to be a string: " + entry1.getKey());
+			if(!mdl.isTable())
+				throw new DatabaseException("Expected value, under key '" + entry1.getKey() + "', of 'models' table to be a table: " + mdl);
+			model = new Model(set, entry1.getKey().getString());
+
+			List<DataField> fields = new LinkedList<>();
+			for (Map.Entry<LuaObject, LuaObject> entry2 : mdl.getEntries())
+			{
+				if(!entry2.getKey().isString())
+					throw new DatabaseException("Expected key of model to be a string, not " + entry2.getKey());
+				fld = entry2.getValue();
+				if(!fld.isTable())
+					throw new DatabaseException("Unexpected value in fields table: " + fld);
+				if(fld.getLength() != 2 ||!fld.rawGet(1).isString() || !fld.rawGet(2).isTable())
+					throw new DatabaseException("Field table should consist of a string and a table");
+				fieldType = fld.rawGet(1).getString();
+				fld = fld.rawGet(2);
+
+				DataField.Builder builder = ModelLibrary.fieldBuilders.get(fieldType);
+
+				if(builder == null)
+					throw new DatabaseException("Unknown field type: " + fieldType);
+
+				fields.add(builder.provide(model, entry2.getKey().getString(), fld));
+			}
+			model.setFields(fields);
 		}
 
 		return patches.size();

@@ -91,7 +91,7 @@ public class InitCommand extends Installer.Command
 
 	private void writeRoutes(HTMLText txt)
 	{
-		txt.wr("path('/').topage('index')");
+		txt.wr("path('/'):topage('index')");
 	}
 
 	private void writeModels(HTMLText txt)

@@ -4,7 +4,7 @@ Point = model 'point' {
     z = field 'float' { primary=true },
 }
 
-Rectangle = model 'Rectangle' {
+Rectangle = model 'rectangle' {
     x = field 'float' { primary=true },
     y = field 'float' { primary=true },
     w = field 'float' { primary=true },
