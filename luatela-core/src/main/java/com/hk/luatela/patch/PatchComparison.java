@@ -85,7 +85,7 @@ public class PatchComparison
 				for(String afterName : added)
 				{
 					afterModel = after.getModel(afterName);
-					if (before.getModel(beforeName).equals(afterModel))
+					if (before.getModel(beforeName).getFields().equals(afterModel.getFields()))
 					{
 						removeBeforeNames.add(beforeName);
 						removeAfterNames.add(afterName);

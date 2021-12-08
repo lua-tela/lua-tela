@@ -1,5 +1,6 @@
 package com.hk.luatela.patch;
 
+import com.hk.luatela.patch.models.Model;
 import com.hk.luatela.patch.models.ModelSet;
 import org.junit.Before;
 import org.junit.Test;
@@ -110,5 +111,53 @@ public class PatchComparisonTest {
 		assertNotNull(comparison.removedModels);
 		assertEquals(1, comparison.removedModels.size());
 		assertEquals("rectangle", comparison.removedModels.get(0).name);
+	}
+
+	@Test
+	public void testOneModelRenamed() throws FileNotFoundException, DatabaseException
+	{
+		ModelSet singleModel, renamedModel;
+		PatchComparison comparison;
+
+		singleModel = LuaBase.loadModelSet(new File(modelDir, "single_model.lua"));
+		renamedModel = LuaBase.loadModelSet(new File(modelDir, "renamed_model.lua"));
+
+		comparison = new PatchComparison(singleModel, renamedModel);
+
+		assertNull(comparison.attemptCompare());
+		assertFalse(comparison.unchanged);
+		assertTrue(comparison.addedModels.isEmpty());
+		assertTrue(comparison.removedModels.isEmpty());
+
+		assertNotNull(comparison.renamedModels);
+		assertEquals(1, comparison.renamedModels.size());
+		assertTrue(comparison.renamedModels.containsKey("point"));
+		Model renamed = comparison.renamedModels.get("point");
+		assertNotNull(renamed);
+		assertEquals("point3", renamed.name);
+	}
+
+	@Test
+	public void testThreeModelsOneRenamed() throws FileNotFoundException, DatabaseException
+	{
+		ModelSet threeModels, threeModelsOneRenamed;
+		PatchComparison comparison;
+
+		threeModels = LuaBase.loadModelSet(new File(modelDir, "three_models.lua"));
+		threeModelsOneRenamed = LuaBase.loadModelSet(new File(modelDir, "three_models_one_renamed.lua"));
+
+		comparison = new PatchComparison(threeModels, threeModelsOneRenamed);
+
+		assertNull(comparison.attemptCompare());
+		assertFalse(comparison.unchanged);
+		assertTrue(comparison.addedModels.isEmpty());
+		assertTrue(comparison.removedModels.isEmpty());
+
+		assertNotNull(comparison.renamedModels);
+		assertEquals(1, comparison.renamedModels.size());
+		assertTrue(comparison.renamedModels.containsKey("station_monthly_stats"));
+		Model renamed = comparison.renamedModels.get("station_monthly_stats");
+		assertNotNull(renamed);
+		assertEquals("monthly_station_stats", renamed.name);
 	}
 }

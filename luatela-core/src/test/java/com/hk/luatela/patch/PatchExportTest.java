@@ -22,11 +22,11 @@ public class PatchExportTest
 	@Test
 	public void testAddSingleModel() throws FileNotFoundException, DatabaseException
 	{
-		ModelSet notEmptySet;
+		ModelSet singleModel;
 
-		notEmptySet = LuaBase.loadModelSet(new File(modelDir, "single_model.lua"));
+		singleModel = LuaBase.loadModelSet(new File(modelDir, "single_model.lua"));
 
-		PatchComparison comparison = new PatchComparison(new ModelSet(), notEmptySet);
+		PatchComparison comparison = new PatchComparison(new ModelSet(), singleModel);
 		assertNull(comparison.attemptCompare());
 
 		PatchExport export = comparison.export(0).excludeHeader();
@@ -57,11 +57,11 @@ public class PatchExportTest
 	@Test
 	public void testRemoveSingleModel() throws FileNotFoundException, DatabaseException
 	{
-		ModelSet notEmptySet;
+		ModelSet singleModel;
 
-		notEmptySet = LuaBase.loadModelSet(new File(modelDir, "single_model.lua"));
+		singleModel = LuaBase.loadModelSet(new File(modelDir, "single_model.lua"));
 
-		PatchComparison comparison = new PatchComparison(notEmptySet, new ModelSet());
+		PatchComparison comparison = new PatchComparison(singleModel, new ModelSet());
 		assertNull(comparison.attemptCompare());
 
 		PatchExport export = comparison.export(1).excludeHeader();
@@ -87,13 +87,47 @@ public class PatchExportTest
 	}
 
 	@Test
-	public void testAddStudentGrade() throws FileNotFoundException, DatabaseException
+	public void testRenameSingleModel() throws FileNotFoundException, DatabaseException
 	{
-		ModelSet notEmptySet;
+		ModelSet singleModel, renamedModel;
 
-		notEmptySet = LuaBase.loadModelSet(new File(modelDir, "student_grade.lua"));
+		singleModel = LuaBase.loadModelSet(new File(modelDir, "single_model.lua"));
+		renamedModel = LuaBase.loadModelSet(new File(modelDir, "renamed_model.lua"));
 
-		PatchComparison comparison = new PatchComparison(new ModelSet(), notEmptySet);
+		PatchComparison comparison = new PatchComparison(singleModel, renamedModel);
+		assertNull(comparison.attemptCompare());
+
+		PatchExport export = comparison.export(1).excludeHeader();
+		assertNotNull(export);
+
+		String exportName = export.getName();
+		assertNotNull(exportName);
+
+		assertTrue(exportName.startsWith("patch-2"));
+
+		HTMLText txt = new HTMLText();
+		assertSame(txt, export.toLua(txt));
+
+		String code = "if patchNo ~= 2 then\n" +
+				"\treturn false\n" +
+				"end\n" +
+				"patchNo = patchNo + 1\n" +
+				"\n" +
+				"models['point3'] = models['point']\n" +
+				"models['point'] = nil\n" +
+				"\n" +
+				"return true";
+		assertEquals(code, txt.create());
+	}
+
+	@Test
+	public void testAddStudentGradeModel() throws FileNotFoundException, DatabaseException
+	{
+		ModelSet studentGradeModel;
+
+		studentGradeModel = LuaBase.loadModelSet(new File(modelDir, "student_grade.lua"));
+
+		PatchComparison comparison = new PatchComparison(new ModelSet(), studentGradeModel);
 		assertNull(comparison.attemptCompare());
 
 		PatchExport export = comparison.export(0).excludeHeader();
@@ -125,13 +159,13 @@ public class PatchExportTest
 	}
 
 	@Test
-	public void testRemoveStudentGrade() throws FileNotFoundException, DatabaseException
+	public void testRemoveStudentGradeModel() throws FileNotFoundException, DatabaseException
 	{
-		ModelSet notEmptySet;
+		ModelSet studentGradeModel;
 
-		notEmptySet = LuaBase.loadModelSet(new File(modelDir, "student_grade.lua"));
+		studentGradeModel = LuaBase.loadModelSet(new File(modelDir, "student_grade.lua"));
 
-		PatchComparison comparison = new PatchComparison(notEmptySet, new ModelSet());
+		PatchComparison comparison = new PatchComparison(studentGradeModel, new ModelSet());
 		assertNull(comparison.attemptCompare());
 
 		PatchExport export = comparison.export(1).excludeHeader();

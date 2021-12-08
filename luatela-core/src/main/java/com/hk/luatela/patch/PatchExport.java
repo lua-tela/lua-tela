@@ -58,15 +58,27 @@ public class PatchExport
 			{
 				txt.pr("models['").wr(newModel.name).wrln("'] = {}");
 				toLua(txt, newModel.getFields());
+				txt.ln();
 			}
-			txt.ln();
 		}
 
 		if(comparison.removedModels != null && !comparison.removedModels.isEmpty())
 		{
 			for (Model newModel : comparison.removedModels)
+			{
 				txt.pr("models['").wr(newModel.name).wrln("'] = nil");
-			txt.ln();
+				txt.ln();
+			}
+		}
+
+		if(comparison.renamedModels != null && !comparison.renamedModels.isEmpty())
+		{
+			for (Map.Entry<String, Model> entry : comparison.renamedModels.entrySet())
+			{
+				txt.pr("models['").wr(entry.getValue().name).wr("'] = models['").wr(entry.getKey()).wrln("']");
+				txt.pr("models['").wr(entry.getKey()).wrln("'] = nil");
+				txt.ln();
+			}
 		}
 
 		txt.wr("return true");
