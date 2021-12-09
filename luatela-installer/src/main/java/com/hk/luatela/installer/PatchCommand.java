@@ -4,9 +4,11 @@ import com.hk.luatela.patch.DatabaseException;
 import com.hk.luatela.patch.LuaBase;
 import com.hk.luatela.patch.PatchComparison;
 import com.hk.str.HTMLText;
+import com.hk.util.KeyValue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.ref.Reference;
 import java.util.LinkedList;
 
 import static com.hk.luatela.installer.Installer.splitToLinesByLen;
@@ -62,8 +64,10 @@ public abstract class PatchCommand extends Installer.Command
 	{
 		try
 		{
-			int patches = base.loadPatches();
-			System.out.println("Loaded " + patches + " patch" + (patches == 1 ? "." : "es."));
+			double[] elapsed = new double[1];
+			int patches = base.loadPatches(elapsed);
+			System.out.print("Loaded " + patches + " patch" + (patches == 1 ? "" : "es"));
+			System.out.println(" in " + ((int) (elapsed[0] * 100) / 100D) + "ms");
 		}
 		catch (DatabaseException e)
 		{

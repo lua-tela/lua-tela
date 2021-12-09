@@ -24,6 +24,7 @@ public class LuaBase
 	public final File dataroot;
 	private Connection connection;
 	private ModelSet patchModelSet, modelSet;
+	private int patchCount;
 
 	public LuaBase(File dataroot) throws FileNotFoundException
 	{
@@ -38,7 +39,17 @@ public class LuaBase
 		this.connection = connection;
 	}
 
+	public int getPatchCount()
+	{
+		return patchCount;
+	}
+
 	public int loadPatches() throws DatabaseException
+	{
+		return loadPatches(null);
+	}
+
+	public int loadPatches(double[] elapsed) throws DatabaseException
 	{
 		if(patchModelSet != null)
 			throw new IllegalStateException("Already loaded patchy model set");
@@ -46,19 +57,12 @@ public class LuaBase
 		patchModelSet = new ModelSet();
 		File patchesDir = new File(dataroot, "patches");
 
-		patchModelSet.startStitch();
-
 		if(!patchesDir.exists())
 		{
-			patchModelSet.endStitch();
 			return 0;
 		}
 
-		int count = applyPatches(patchModelSet, patchesDir);
-
-		patchModelSet.endStitch();
-
-		return count;
+		return patchCount = applyPatches(patchModelSet, patchesDir, elapsed);
 	}
 
 	public PatchComparison checkNew() throws FileNotFoundException, DatabaseException
@@ -131,7 +135,7 @@ public class LuaBase
 		return importModelSet(new ModelSet(), models);
 	}
 
-	static int applyPatches(ModelSet set, File dir) throws DatabaseException
+	static int applyPatches(ModelSet set, File dir, double[] elapsed) throws DatabaseException
 	{
 		Pattern patchName = Pattern.compile("patch-(\\d+)[-\\w]*\\.lua");
 		File[] files = Objects.requireNonNull(dir.listFiles());
@@ -157,6 +161,7 @@ public class LuaBase
 		if(patches.isEmpty())
 			return 0;
 
+		long nanos = System.nanoTime();
 		LuaInterpreter interp = Lua.interpreter();
 		Lua.importStandard(interp);
 
@@ -175,6 +180,9 @@ public class LuaBase
 		{
 			throw new Error(); // shouldn't really be possible...
 		}
+		nanos = System.nanoTime() - nanos;
+		if(elapsed != null && elapsed.length > 0)
+			elapsed[0] = nanos / 1E6D;
 
 		patchNo = (int) interp.getGlobals().getVar("patchNo").getInteger();
 		patchNo--;
@@ -196,6 +204,8 @@ public class LuaBase
 		{
 			mdl = entry1.getValue();
 
+			if(mdl.isNil())
+				continue;
 			if(!entry1.getKey().isString())
 				throw new DatabaseException("Expected key of 'models' table to be a string: " + entry1.getKey());
 			if(!mdl.isTable())

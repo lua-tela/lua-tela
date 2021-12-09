@@ -32,7 +32,7 @@ public final class Model extends LuaUserdata
 			this.fields = new LinkedList<>(fields);
 
 		boolean hasPrimary = false;
-		for(DataField field : fields)
+		for(DataField field : this.fields)
 		{
 			hasPrimary |= field.isPrimary();
 			fieldMap.put(field.name, field);

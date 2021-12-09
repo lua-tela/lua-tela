@@ -35,7 +35,7 @@ public class PatchUpCommand extends PatchCommand
 			return;
 		}
 
-		PatchExport export = comparison.export(base.getPatchModelSet().getPatchCount());
+		PatchExport export = comparison.export(base.getPatchCount());
 
 		if(excludeHeader)
 			export.excludeHeader();

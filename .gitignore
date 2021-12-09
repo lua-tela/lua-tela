@@ -37,3 +37,4 @@ luatela-core/target/
 luatela-web/target/
 luatela-installer/target/
 !luatela-installer/luatela.jar
+/luatela-installer/src/test/base/

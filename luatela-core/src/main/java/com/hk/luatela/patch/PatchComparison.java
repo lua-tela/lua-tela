@@ -34,9 +34,9 @@ public class PatchComparison
 		added.removeAll(deleted);
 		deleted.removeAll(tmp);
 
-//		System.out.println(added);
-//		System.out.println(deleted);
-//		System.out.println(included);
+//		System.out.println("included = " + included);
+//		System.out.println("added = " + added);
+//		System.out.println("deleted = " + deleted);
 
 		unchanged = added.isEmpty() && deleted.isEmpty();
 		if(unchanged)

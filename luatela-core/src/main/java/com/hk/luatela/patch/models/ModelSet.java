@@ -9,12 +9,10 @@ import java.util.Map;
 public class ModelSet implements Iterable<Model>
 {
 	private final Map<String, Model> models;
-	private int patchCount;
 
 	public ModelSet()
 	{
 		models = new HashMap<>();
-		patchCount = -1;
 	}
 
 	public int size()
@@ -33,21 +31,6 @@ public class ModelSet implements Iterable<Model>
 			throw new DatabaseException("duplicate model '" + model.name + "'");
 
 		models.put(model.name, model);
-	}
-
-	public void startStitch()
-	{
-		patchCount = 0;
-	}
-
-	public void endStitch()
-	{
-		patchCount = -patchCount;
-	}
-
-	public int getPatchCount()
-	{
-		return patchCount;
 	}
 
 	@Override

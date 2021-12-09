@@ -57,7 +57,7 @@ public abstract class DataField extends LuaUserdata implements Comparable<DataFi
 	@Override
 	public int compareTo(DataField o)
 	{
-		return Boolean.compare(primary, o.primary);
+		return Boolean.compare(o.primary, primary);
 	}
 
 	@Override
