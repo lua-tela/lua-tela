@@ -2,6 +2,8 @@ package com.hk.luatela.installer;
 
 import com.hk.luatela.patch.LuaBase;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -271,6 +273,7 @@ public class Installer
 	private static Scanner in;
 	private static final Map<String, Supplier<Command>> commands = new TreeMap<>();
 	static final String BASE_PROPERTY = "luatela.base";
+	static final DateFormat compact = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	static
 	{

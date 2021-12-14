@@ -76,6 +76,6 @@ public class TemplateRoute extends Route
 
 		Object res = interp.execute();
 		if(res instanceof LuaObject && !((LuaObject) res).isNil())
-			handle(interp, (LuaObject) res, context.response.getWriter(), context.path);
+			handle(interp, (LuaObject) res, context, 1);
 	}
 }

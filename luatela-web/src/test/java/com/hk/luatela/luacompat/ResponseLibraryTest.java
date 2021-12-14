@@ -1,6 +1,7 @@
 package com.hk.luatela.luacompat;
 
 import com.hk.luatela.LuaTelaTest;
+import com.hk.math.Rand;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -15,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Random;
 
 import static org.junit.Assert.*;
 
@@ -285,6 +287,84 @@ public class ResponseLibraryTest
 		entity = response.getEntity();
 		assertTrue(location.endsWith("/response/redirects/destination"));
 		assertEquals("12000", EntityUtils.toString(entity));
+	}
+
+	@Test
+	public void testPaths() throws IOException
+	{
+		HttpGet request;
+		HttpResponse response;
+		HttpEntity entity;
+
+		request = new HttpGet("/response/paths");
+		response = client.execute(LuaTelaTest.config, request);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		entity = response.getEntity();
+		assertEquals("18000", EntityUtils.toString(entity));
+
+		request = new HttpGet("/response/paths/cont");
+		response = client.execute(LuaTelaTest.config, request);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		entity = response.getEntity();
+		assertEquals("18001", EntityUtils.toString(entity));
+
+		String url = "/response/paths/eighteen-thousand-and-";
+		String[] urls = {
+				"eleven", "twelve", "thirteen", "fourteen", "fifteen",
+				"sixteen", "seventeen", "eighteen", "nineteen"
+		};
+		for(int i = 0; i < urls.length; i++)
+		{
+			request = new HttpGet(url + urls[i]);
+			response = client.execute(LuaTelaTest.config, request);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+
+			entity = response.getEntity();
+			assertEquals(String.valueOf(18011 + i), EntityUtils.toString(entity));
+		}
+
+		Random rng = new Random(-3574730183157797125L);
+		for(int i = 18000; i < 19000;)
+		{
+			request = new HttpGet("/response/paths/" + i);
+			response = client.execute(LuaTelaTest.config, request);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+
+			entity = response.getEntity();
+			assertEquals(String.valueOf(i), EntityUtils.toString(entity));
+
+			i += rng.nextInt(10) + 1;
+		}
+
+		request = new HttpGet("/response/paths/19000");
+		response = client.execute(LuaTelaTest.config, request);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		entity = response.getEntity();
+		assertEquals("NaN", EntityUtils.toString(entity));
+
+		request = new HttpGet("/response/paths/17999");
+		response = client.execute(LuaTelaTest.config, request);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		entity = response.getEntity();
+		assertEquals("NaN", EntityUtils.toString(entity));
+
+		request = new HttpGet("/response/paths/NaN");
+		response = client.execute(LuaTelaTest.config, request);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		entity = response.getEntity();
+		assertEquals("NaN", EntityUtils.toString(entity));
+
+		request = new HttpGet("/response/paths/randomness");
+		response = client.execute(LuaTelaTest.config, request);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+
+		entity = response.getEntity();
+		assertEquals("NaN", EntityUtils.toString(entity));
 	}
 
 	@After

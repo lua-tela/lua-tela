@@ -35,6 +35,7 @@ responsePth:path('/headers'):topage() -- 80000
 responsePth:path('/status'):topage() -- 90000
 responsePth:path('/serve'):topage() -- 11000
 responsePth:path('/redirects'):topage() -- 12000
+responsePth:path('/paths'):topage() -- 18000
 
 local contextPth = path('/context')
 

@@ -2,6 +2,7 @@ package com.hk.luatela.installer;
 
 import com.hk.file.FileUtil;
 import com.hk.io.IOUtil;
+import com.hk.math.StorageUtils;
 import com.hk.str.HTMLText;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -143,6 +144,55 @@ class RunCommand extends Installer.Command
 
 			this.server = new Server();
 
+			server.setRequestLog((request, response) -> {
+				System.out.print('[');
+				System.out.print(Installer.compact.format(request.getTimeStamp()));
+				System.out.print("] [");
+				System.out.print(response.getStatus());
+
+				long size = response.getCommittedMetaData().getContentLength();
+				if(size >= 0)
+				{
+					System.out.print("] [");
+					double amnt = (double) size;
+					String unit = null;
+
+					if(size >= StorageUtils.GIGABYTE)
+					{
+						amnt /= StorageUtils.GIGABYTE;
+						unit = "gb";
+					}
+					else if(size >= StorageUtils.MEGABYTE)
+					{
+						amnt /= StorageUtils.MEGABYTE;
+						unit = "mb";
+					}
+					else if(size >= StorageUtils.KILOBYTE)
+					{
+						amnt /= StorageUtils.KILOBYTE;
+						unit = "kb";
+					}
+
+					if (unit != null)
+					{
+						if(amnt == (double)(long) amnt)
+							System.out.print((int) amnt);
+						else
+							System.out.print((int) (amnt * 100) / 100D);
+						System.out.print(unit);
+					}
+					else
+						System.out.print(size);
+				}
+
+				System.out.print("] ");
+				System.out.print(request.getRemoteAddr());
+				System.out.print(" - ");
+				System.out.print(request.getRequestURL());
+
+				System.out.println();
+			});
+
 			if(sslEnabled)
 			{
 				HttpConfiguration https = new HttpConfiguration();
@@ -191,12 +241,10 @@ class RunCommand extends Installer.Command
 
 			Thread.sleep(1000);
 
+			System.out.println("Enter 'stop' to stop the server");
 			do
 			{
 				line = Installer.nextLine();
-
-				if(line != null && !line.trim().isEmpty())
-					System.out.println("Type 'stop' to stop the server");
 			} while (!"stop".equalsIgnoreCase(line));
 		}
 		catch (Exception e)

@@ -32,19 +32,23 @@ public abstract class Route
 		return null;
 	}
 
-	static void handle(LuaInterpreter interp, LuaObject obj, PrintWriter writer, String path)
+	static void handle(LuaInterpreter interp, LuaObject obj, LuaContext ctx, int count) throws IOException
 	{
+		if(obj.isNil())
+			return;
+
+		PrintWriter writer = ctx.response.getWriter();
 		if(obj.isFunction())
 		{
 			boolean cont;
 			long pass = 1;
 			do
 			{
-				LuaObject r = obj.callFunction(interp, path, pass++);
+				LuaObject r = obj.callFunction(interp, ctx.path, pass++);
 				cont = r.getBoolean();
 
 				if(cont)
-					handle(interp, r, writer, path);
+					handle(interp, r, ctx, count + 1);
 			} while(cont);
 		}
 		else if(obj.isTable())
@@ -54,10 +58,10 @@ public abstract class Route
 			if(len > 0)
 			{
 				for(long i = 1; i <= len; i++)
-					handle(interp, obj.getIndex(interp, i), writer, path);
+					handle(interp, obj.getIndex(interp, i), ctx, count + 1);
 			}
 			else
-				handle(interp, obj.getIndex(interp, path), writer, path);
+				handle(interp, obj.getIndex(interp, ctx.path), ctx, count + 1);
 		}
 		else if(obj.isBoolean())
 		{
@@ -66,7 +70,10 @@ public abstract class Route
 		}
 		else
 		{
-			writer.write(obj.getString());
+			String str = obj.getString();
+			if(count == 1 && ctx.response.getHeader("Content-Length") == null)
+					ctx.response.setContentLength(str.length());
+			writer.write(str);
 		}
 	}
 
