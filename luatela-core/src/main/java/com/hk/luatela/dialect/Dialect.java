@@ -1,5 +1,7 @@
 package com.hk.luatela.dialect;
 
+import com.hk.str.HTMLText;
+
 public interface Dialect
 {
 	Query select(FieldMeta... fields);
@@ -8,18 +10,20 @@ public interface Dialect
 
 	TableMeta table(Owner owner, String name);
 
-	interface Query
+	static String toString(DialectOwner o)
+	{
+		return o.print(new HTMLText()).create();
+	}
+
+	interface Query extends DialectOwner
 	{
 		Query from(TableMeta... tables);
 
 		Query where(Condition... conditions);
 
-		Dialect dialect();
-
-		String toString();
 	}
 
-	interface QueryValue
+	interface QueryValue extends DialectOwner
 	{
 		Condition isEqual(QueryValue value);
 
@@ -50,28 +54,16 @@ public interface Dialect
 		QueryValue bitwiseOr(QueryValue value);
 
 		QueryValue bitwiseExclusiveOr(QueryValue value);
-
-		Dialect dialect();
-
-		String toString();
 	}
 
 	interface FieldMeta extends QueryValue
 	{
 		boolean isValue();
-
-		Dialect dialect();
-
-		String toString();
 	}
 
-	interface TableMeta
+	interface TableMeta extends DialectOwner
 	{
 		FieldMeta field(String name);
-
-		Dialect dialect();
-
-		String toString();
 	}
 
 	interface Condition extends QueryValue
@@ -81,10 +73,13 @@ public interface Dialect
 		Condition or(Condition condition);
 
 		Condition not();
+	}
 
+	interface DialectOwner
+	{
 		Dialect dialect();
 
-		String toString();
+		HTMLText print(HTMLText txt);
 	}
 
 	enum Owner
