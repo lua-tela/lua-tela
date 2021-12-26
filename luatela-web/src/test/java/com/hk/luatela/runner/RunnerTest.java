@@ -29,7 +29,6 @@ public class RunnerTest
 	public void setUp() throws Exception
 	{
 		inits = Paths.get("src/test/resources/inits");
-		inits = inits.toAbsolutePath();
 
 		Files.deleteIfExists(inits.resolve("onetime.json"));
 
@@ -69,6 +68,8 @@ public class RunnerTest
 		{
 			e.printStackTrace();
 		}
+		runner.close();
+
 		JsonValue val = null;
 		try
 		{
