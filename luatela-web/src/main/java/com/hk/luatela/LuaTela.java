@@ -6,6 +6,7 @@ import com.hk.luatela.luacompat.ContextLibrary;
 import com.hk.luatela.patch.DatabaseException;
 import com.hk.luatela.patch.LuaBase;
 import com.hk.luatela.routes.Routes;
+import com.hk.luatela.runner.Runner;
 import com.hk.luatela.servlet.ResourceServlet;
 
 import javax.servlet.ServletContext;
@@ -26,6 +27,7 @@ public class LuaTela
 	public final String resourcePath;
 	public final Path dataroot, resourceRoot;
 	public final Routes routes;
+	public final Runner runner;
 
 	public LuaTela(ServletContext context)
 	{
@@ -66,6 +68,7 @@ public class LuaTela
 		registration.addMapping("/" + resourcePath + "/*");
 
 		routes = new Routes(this::injectInto, dataroot.resolve("routes.lua"));
+		runner = new Runner(this::injectInto, dataroot.resolve("init.lua"));
 
 		context.setAttribute(QUALIKEY, this);
 
@@ -108,11 +111,24 @@ public class LuaTela
 			throw new InitializationException(e);
 		}
 
+		runner.collect(out);
+
 		out.println("Using Data-Root: \"" + dataroot + "\"");
 		out.println("Using Resource-Root: \"" + resourceRoot + "\"");
 		out.println("Using Resource-Path: \"" + resourcePath + "\"");
 		out.print("Loaded " + routes.size());
 		out.println(" route" + (routes.size() == 1 ? "" : "s") + " roots");
+		int tasks = runner.getTasks();
+		if(tasks > 0)
+		{
+			out.print("Loaded " + tasks + " task");
+			out.println(tasks == 1 ? "" : "s");
+		}
+	}
+
+	public void shutdown()
+	{
+		runner.close();
 	}
 
 	public void injectInto(LuaInterpreter interp)

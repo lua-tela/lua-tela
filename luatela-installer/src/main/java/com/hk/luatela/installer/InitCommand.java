@@ -59,6 +59,7 @@ public class InitCommand extends Installer.Command
 			Map<String, Consumer<HTMLText>> files = new HashMap<>();
 			files.put("routes.lua", this::writeRoutes);
 			files.put("models.lua", this::writeModels);
+			files.put("init.lua", this::writeInit);
 			files.put("pages/index.lua", this::writeIndexPage);
 
 			for (Map.Entry<String, Consumer<HTMLText>> entry : files.entrySet())
@@ -99,6 +100,11 @@ public class InitCommand extends Installer.Command
 		txt.wr("print 'Loading models'");
 	}
 
+	private void writeInit(HTMLText txt)
+	{
+		txt.wr("print 'Runner service not created'");
+	}
+
 	private void writeIndexPage(HTMLText txt)
 	{
 		txt.wrln("response.setContentType('text/html')").ln().wr("return 'OK'");
@@ -114,6 +120,7 @@ public class InitCommand extends Installer.Command
 
 		txt.prln("- routes.lua (with one simple route to index.lua)");
 		txt.prln("- models.lua (with no models or patches)");
+		txt.prln("- init.lua (without service)");
 		txt.prln("- pages/index.lua (just return 'OK')");
 
 		txt.tabDown().ln();

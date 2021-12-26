@@ -25,7 +25,7 @@ public class Routes
 		this.preparer = preparer;
 		String source = routesPath.getFileName().toString();
 		if(!Files.exists(routesPath))
-			throw new InitializationException("'" + source + "' not found in data root directory (" + routesPath.getParent() + ")");
+			throw new InitializationException("'" + source + "' not found in data root directory (" + dataroot + ")");
 
 		try
 		{
