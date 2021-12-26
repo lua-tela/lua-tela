@@ -42,7 +42,11 @@ local function onetime()
 end
 
 local function task(pass)
-    local obj = json.readFile(inits .. '/tasks.json')
+    local obj, msg = json.readFile(inits .. '/tasks.json')
+
+    if not obj then
+        error('obj from JSON file should not be nil: ' .. inits .. '/tasks.json\n' .. msg)
+    end
 
     obj.tasks = obj.tasks or 0
     obj.tasks = obj.tasks + 1
