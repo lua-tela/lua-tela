@@ -58,4 +58,27 @@ public class MySQLDialect implements Dialect
 			return instance;
 		}
 	}
+
+	public enum MySQLQueryTest implements QueryTest
+	{
+		EQUALS,
+		NOT_EQUALS,
+		LESS_THAN,
+		LESS_EQ_THAN,
+		GRTR_THAN,
+		GRTR_EQ_THAN,
+		LIKE;
+	}
+
+	public enum MySQLQueryOperator implements QueryOperator
+	{
+		ADD,
+		SUBTRACT,
+		MULTIPLY,
+		DIVIDE,
+		MODULO,
+		BAND,
+		BOR,
+		BXOR;
+	}
 }

@@ -15,93 +15,15 @@ public class MySQLPrimitiveValueMeta implements QueryValue, MySQLDialect.MySQLDi
 	}
 
 	@Override
-	public Condition isEqual(QueryValue value)
+	public Condition is(QueryTest test, QueryValue value)
 	{
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
 	@Override
-	public Condition isNotEqual(QueryValue value)
+	public QueryValue op(QueryOperator op, QueryValue value)
 	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Condition isLessThan(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Condition isLessThanOrEQ(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Condition isGreaterThan(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Condition isGreaterThanOrEQ(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Condition isLike(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public QueryValue add(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public QueryValue subtract(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public QueryValue multiply(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public QueryValue divide(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public QueryValue modulo(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public QueryValue bitwiseAnd(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public QueryValue bitwiseOr(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public QueryValue bitwiseExclusiveOr(QueryValue value)
-	{
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
 	@Override

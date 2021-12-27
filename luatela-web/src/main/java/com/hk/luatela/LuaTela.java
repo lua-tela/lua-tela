@@ -7,6 +7,7 @@ import com.hk.luatela.patch.DatabaseException;
 import com.hk.luatela.patch.LuaBase;
 import com.hk.luatela.routes.Routes;
 import com.hk.luatela.runner.Runner;
+import com.hk.luatela.servlet.MainServlet;
 import com.hk.luatela.servlet.ResourceServlet;
 
 import javax.servlet.ServletContext;
@@ -62,10 +63,17 @@ public class LuaTela
 
 		this.resourceRoot = resourceRoot;
 
-		ServletRegistration.Dynamic registration = context.addServlet(
+		ServletRegistration.Dynamic registration;
+
+		registration = context.addServlet(
 				ResourceServlet.class.getName(), ResourceServlet.class);
 		registration.setLoadOnStartup(1);
 		registration.addMapping("/" + resourcePath + "/*");
+
+		registration = context.addServlet(
+				MainServlet.class.getName(), MainServlet.class);
+		registration.setLoadOnStartup(-1);
+		registration.addMapping("/*");
 
 		routes = new Routes(this::injectInto, dataroot.resolve("routes.lua"));
 		runner = new Runner(this::injectInto, dataroot.resolve("init.lua"));
@@ -160,37 +168,40 @@ public class LuaTela
 			{
 				Path fullPath = Paths.get(string);
 				if (Files.exists(fullPath))
-					return fullPath.toAbsolutePath();
+					result = fullPath;
 			}
 			catch (InvalidPathException ignored)
 			{}
 
-			int idx = string.indexOf(':');
-			if (idx <= 0 || idx == string.length() - 1)
-				throw new InitializationException(name + " must be in '[type]:[path]' format.");
-			String path = string.substring(idx + 1);
-			switch (string.substring(0, idx))
+			if(result == null)
 			{
-				case "pth":
-					path = context.getRealPath(path.replace(File.separator, "/"));
-					break;
-				case "rel":
-					path = System.getProperty("user.dir") + File.separator + path;
-					break;
-				case "abs":
-					if (!Paths.get(path).isAbsolute())
-						throw new InitializationException("expected " + name + " to be an absolute path");
-					break;
-				default:
-					throw new InitializationException(name + " type must be 'rel' (relative to wd), 'pth' (relative to webapp), or 'abs' (absolute).");
+				int idx = string.indexOf(':');
+				if (idx <= 0 || idx == string.length() - 1)
+					throw new InitializationException(name + " must be in '[type]:[path]' format.");
+				String path = string.substring(idx + 1);
+				switch (string.substring(0, idx))
+				{
+					case "pth":
+						path = context.getRealPath(path.replace(File.separator, "/"));
+						break;
+					case "rel":
+						path = System.getProperty("user.dir") + File.separator + path;
+						break;
+					case "abs":
+						if (!Paths.get(path).isAbsolute())
+							throw new InitializationException("expected " + name + " to be an absolute path");
+						break;
+					default:
+						throw new InitializationException(name + " type must be 'rel' (relative to wd), 'pth' (relative to webapp), or 'abs' (absolute).");
+				}
+				Path fileRoot = Paths.get(path);
+				if (!Files.exists(fileRoot) || !Files.isDirectory(fileRoot))
+					throw new InitializationException(name + " not found: " + fileRoot);
+				result = fileRoot;
 			}
-			Path fileRoot = Paths.get(path);
-			if (!Files.exists(fileRoot) || !Files.isDirectory(fileRoot))
-				throw new InitializationException(name + " not found: " + fileRoot);
-			result = fileRoot;
 		}
 
-		return result;
+		return result != null ? result.toAbsolutePath().normalize() : null;
 	}
 
 	public static String escapeHTML(String s)

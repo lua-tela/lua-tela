@@ -83,27 +83,31 @@ public class Runner implements Closeable
 
 	public void collect(PrintStream out)
 	{
-		this.out = out;
-		preparer.accept(interp);
-		try
+		if(interp != null)
 		{
-			interp.execute();
-		}
-		catch(LuaException ex)
-		{
-			ex.printStackTrace();
-			throw new InitializationException();
-		}
-		finally
-		{
-			this.out = null;
+			this.out = out;
+			preparer.accept(interp);
+			try
+			{
+				interp.execute();
+			}
+			catch (LuaException ex)
+			{
+				ex.printStackTrace();
+				throw new InitializationException();
+			}
+			finally
+			{
+				this.out = null;
+			}
 		}
 	}
 
 	@Override
 	public void close()
 	{
-		executor.shutdownNow();
+		if(executor != null)
+			executor.shutdownNow();
 	}
 
 	class LuaRunnable implements Runnable

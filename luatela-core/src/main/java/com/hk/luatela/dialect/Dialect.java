@@ -1,6 +1,7 @@
 package com.hk.luatela.dialect;
 
 import com.hk.str.HTMLText;
+import com.hk.str.StringUtil;
 
 public interface Dialect
 {
@@ -20,40 +21,33 @@ public interface Dialect
 		Query from(TableMeta... tables);
 
 		Query where(Condition... conditions);
-
 	}
 
 	interface QueryValue extends DialectOwner
 	{
-		Condition isEqual(QueryValue value);
+		Condition is(QueryTest test, QueryValue value);
 
-		Condition isNotEqual(QueryValue value);
+		QueryValue op(QueryOperator op, QueryValue value);
+	}
 
-		Condition isLessThan(QueryValue value);
+	interface QueryTest
+	{
+		default String getName()
+		{
+			return StringUtil.properCapitalize(name());
+		}
 
-		Condition isLessThanOrEQ(QueryValue value);
+		String name();
+	}
 
-		Condition isGreaterThan(QueryValue value);
+	interface QueryOperator
+	{
+		default String getName()
+		{
+			return StringUtil.properCapitalize(name());
+		}
 
-		Condition isGreaterThanOrEQ(QueryValue value);
-
-		Condition isLike(QueryValue value);
-
-		QueryValue add(QueryValue value);
-
-		QueryValue subtract(QueryValue value);
-
-		QueryValue multiply(QueryValue value);
-
-		QueryValue divide(QueryValue value);
-
-		QueryValue modulo(QueryValue value);
-
-		QueryValue bitwiseAnd(QueryValue value);
-
-		QueryValue bitwiseOr(QueryValue value);
-
-		QueryValue bitwiseExclusiveOr(QueryValue value);
+		String name();
 	}
 
 	interface FieldMeta extends QueryValue
