@@ -165,10 +165,10 @@ class RoutePath extends LuaUserdata
 
 		pathMetatable.rawSet("__name", "*PATH");
 		pathMetatable.rawSet("__index", pathMetatable);
-		pathMetatable.rawSet("path", Lua.newFunc(RoutePath::new));
-		pathMetatable.rawSet("getfile", Lua.newFunc(RoutePath::getFile));
-		pathMetatable.rawSet("topage", Lua.newFunc(RoutePath::toPage));
-		pathMetatable.rawSet("tosource", Lua.newFunc(RoutePath::toSource));
-		pathMetatable.rawSet("totemplate", Lua.newFunc(RoutePath::toTemplate));
+		pathMetatable.rawSet("path", Lua.newMethod(RoutePath::new));
+		pathMetatable.rawSet("getfile", Lua.newMethod(RoutePath::getFile));
+		pathMetatable.rawSet("topage", Lua.newMethod(RoutePath::toPage));
+		pathMetatable.rawSet("tosource", Lua.newMethod(RoutePath::toSource));
+		pathMetatable.rawSet("totemplate", Lua.newMethod(RoutePath::toTemplate));
 	}
 }

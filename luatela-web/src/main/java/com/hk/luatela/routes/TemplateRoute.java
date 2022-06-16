@@ -74,8 +74,8 @@ public class TemplateRoute extends Route
 		interp.importLib(new LuaLibrary<>("request", RequestLibrary.class));
 		interp.importLib(new LuaLibrary<>("response", ResponseLibrary.class));
 
-		Object res = interp.execute();
-		if(res instanceof LuaObject && !((LuaObject) res).isNil())
-			handle(interp, (LuaObject) res, context, 1);
+		LuaObject res = interp.execute();
+		if(res instanceof LuaObject && !res.isNil())
+			handle(interp, res, context, 1);
 	}
 }

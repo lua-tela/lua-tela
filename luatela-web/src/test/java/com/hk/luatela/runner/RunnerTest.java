@@ -41,7 +41,7 @@ public class RunnerTest
 	public void test() throws IOException {
 		int[] flag = new int[1];
 		Runner runner = new Runner(interp -> {
-			interp.getGlobals().setVar("finished", Lua.newFunc((interp1, args) -> {
+			interp.getGlobals().setVar("finished", Lua.newMethod((interp1, args) -> {
 				flag[0]++;
 				return null;
 			}));

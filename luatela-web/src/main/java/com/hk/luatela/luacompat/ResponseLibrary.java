@@ -1,6 +1,5 @@
 package com.hk.luatela.luacompat;
 
-import com.hk.func.BiConsumer;
 import com.hk.lua.*;
 import com.hk.luatela.LuaContext;
 import com.hk.luatela.servlet.ResourceServlet;
@@ -9,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.util.function.BiConsumer;
 
 @SuppressWarnings("unused")
 public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMethod
@@ -54,7 +54,7 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
             Lua.checkArgs(toString(), args, LuaType.INTEGER);
             LuaContext ctx = interp.getExtra("context", LuaContext.class);
 
-            ctx.response.setContentLengthLong(args[0].getInteger());
+            ctx.response.setContentLengthLong(args[0].getLong());
 
             return Lua.TRUE;
         }
@@ -77,7 +77,7 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
             Lua.checkArgs(toString(), args, LuaType.INTEGER);
             LuaContext ctx = interp.getExtra("context", LuaContext.class);
 
-            ctx.response.setStatus((int) args[0].getInteger());
+            ctx.response.setStatus(args[0].getInt());
             return Lua.TRUE;
         }
     },
@@ -147,6 +147,6 @@ public enum ResponseLibrary implements BiConsumer<Environment, LuaObject>, Lua.L
     {
         String name = toString();
         if(name != null && !name.trim().isEmpty())
-            table.setIndex(env.interp, name, Lua.newFunc(this));
+            table.setIndex(env.interp, name, Lua.newMethod(this));
     }
 }

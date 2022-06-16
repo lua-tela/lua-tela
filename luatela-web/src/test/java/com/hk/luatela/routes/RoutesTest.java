@@ -27,7 +27,7 @@ public class RoutesTest
 	{
 		int[] flag = new int[1];
 		Routes routes = new Routes(interp -> {
-			interp.getGlobals().setVar("finished", Lua.newFunc((interp1, args) ->
+			interp.getGlobals().setVar("finished", Lua.newMethod((interp1, args) ->
 			{
 				flag[0]++;
 				return null;

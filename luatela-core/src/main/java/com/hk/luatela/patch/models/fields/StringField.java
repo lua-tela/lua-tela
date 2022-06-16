@@ -25,7 +25,7 @@ public class StringField extends DataField
 			if(!length.isInteger())
 				throw new LuaException("expected length of field '" + name + "' to be an integer");
 
-			this.length = (int) length.getInteger();
+			this.length = length.getInt();
 		}
 
 		return super.accept(properties);

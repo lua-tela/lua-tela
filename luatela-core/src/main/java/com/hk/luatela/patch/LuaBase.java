@@ -87,7 +87,7 @@ public class LuaBase
 
 	public static void injectRequire(LuaInterpreter interp, Path dataroot)
 	{
-		interp.getGlobals().setVar("require", Lua.newFunc((interp1, args) -> {
+		interp.getGlobals().setVar("require", Lua.newMethod((interp1, args) -> {
 			Lua.checkArgs("require", args, LuaType.STRING);
 			String src = args[0].getString();
 
@@ -184,7 +184,7 @@ public class LuaBase
 		if(elapsed != null && elapsed.length > 0)
 			elapsed[0] = nanos / 1E6D;
 
-		patchNo = (int) interp.getGlobals().getVar("patchNo").getInteger();
+		patchNo = interp.getGlobals().getVar("patchNo").getInt();
 		patchNo--;
 
 		if(patchNo != patches.size())

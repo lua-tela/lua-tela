@@ -1,12 +1,12 @@
 package com.hk.luatela.runner;
 
-import com.hk.func.BiConsumer;
 import com.hk.lua.*;
 
-import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
+@SuppressWarnings("unused")
 public enum RunnerLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMethod
 {
 	create() {
@@ -49,7 +49,7 @@ public enum RunnerLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lua
 			String unit = args[2].getString().toUpperCase(Locale.ROOT);
 			try
 			{
-				runner.scheduleSingle(args[0], args[1].getInteger(), TimeUnit.valueOf(unit));
+				runner.scheduleSingle(args[0], args[1].getLong(), TimeUnit.valueOf(unit));
 			}
 			catch (IllegalArgumentException ex)
 			{
@@ -69,7 +69,7 @@ public enum RunnerLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lua
 			String unit = args[2].getString().toUpperCase(Locale.ROOT);
 			try
 			{
-				runner.schedule(args[0], args[1].getInteger(), TimeUnit.valueOf(unit));
+				runner.schedule(args[0], args[1].getLong(), TimeUnit.valueOf(unit));
 			}
 			catch (IllegalArgumentException ex)
 			{
@@ -90,6 +90,6 @@ public enum RunnerLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lua
 	{
 		String name = toString();
 		if(name != null && !name.trim().isEmpty())
-			table.setIndex(env.interp, name, Lua.newFunc(this));
+			table.setIndex(env.interp, name, Lua.newMethod(this));
 	}
 }

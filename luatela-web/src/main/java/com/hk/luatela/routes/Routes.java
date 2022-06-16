@@ -47,7 +47,7 @@ public class Routes
 
 		interp.setExtra("routes", this);
 		interp.setExtra("dataroot", dataroot);
-		interp.getGlobals().setVar("path", Lua.newFunc(RoutePath::new));
+		interp.getGlobals().setVar("path", Lua.newMethod(RoutePath::new));
 
 		routeSet = new SortedList<>(new Route.Comp());
 	}

@@ -1,6 +1,5 @@
 package com.hk.luatela.luacompat;
 
-import com.hk.func.BiConsumer;
 import com.hk.lua.*;
 import com.hk.lua.Lua.LuaMethod;
 import com.hk.luatela.LuaTela;
@@ -9,8 +8,10 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 @SuppressWarnings({"unused", "unchecked"})
 public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMethod
@@ -148,14 +149,7 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
             Lua.checkArgs(toString(), args, LuaType.STRING);
 
             LuaTela luaTela = interp.getExtra(LuaTela.QUALIKEY, LuaTela.class);
-            try
-            {
-                return Lua.newString("/" + luaTela.resourcePath + "/" + URLEncoder.encode(args[0].getString(), "UTF-8"));
-            }
-            catch (UnsupportedEncodingException ex)
-            {
-                throw new Error();
-            }
+            return Lua.newString("/" + luaTela.resourcePath + "/" + URLEncoder.encode(args[0].getString(), StandardCharsets.UTF_8));
         }
     },
     urlEncode() {
@@ -163,14 +157,7 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
         public LuaObject call(LuaInterpreter interp, LuaObject[] args)
         {
             Lua.checkArgs(toString(), args, LuaType.STRING);
-            try
-            {
-                return Lua.newString(URLEncoder.encode(args[0].getString(), "UTF-8"));
-            }
-            catch (UnsupportedEncodingException ex)
-            {
-                throw new Error();
-            }
+            return Lua.newString(URLEncoder.encode(args[0].getString(), StandardCharsets.UTF_8));
         }
     },
     urlDecode() {
@@ -178,14 +165,7 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
         public LuaObject call(LuaInterpreter interp, LuaObject[] args)
         {
             Lua.checkArgs(toString(), args, LuaType.STRING);
-            try
-            {
-                return Lua.newString(URLDecoder.decode(args[0].getString(), "UTF-8"));
-            }
-            catch (UnsupportedEncodingException ex)
-            {
-                throw new Error();
-            }
+            return Lua.newString(URLDecoder.decode(args[0].getString(), StandardCharsets.UTF_8));
         }
     };
 
@@ -200,6 +180,6 @@ public enum ContextLibrary implements BiConsumer<Environment, LuaObject>, LuaMet
     {
         String name = toString();
         if(name != null && !name.trim().isEmpty())
-            table.setIndex(env.interp, name, Lua.newFunc(this));
+            table.setIndex(env.interp, name, Lua.newMethod(this));
     }
 }

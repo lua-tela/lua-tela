@@ -1,6 +1,5 @@
 package com.hk.luatela.luacompat;
 
-import com.hk.func.BiConsumer;
 import com.hk.json.Json;
 import com.hk.lua.*;
 import com.hk.luatela.LuaContext;
@@ -15,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 @SuppressWarnings({"unused", "unchecked"})
 public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMethod
@@ -270,7 +270,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 
 			metatable.rawSet("__name", "*QUERY");
 			metatable.rawSet("__index", metatable);
-			metatable.rawSet("__tostring", Lua.newFunc((interp, args) -> Lua.newString(query)));
+			metatable.rawSet("__tostring", Lua.newMethod((interp, args) -> Lua.newString(query)));
 
 			tbl.setMetatable(metatable);
 		}
@@ -335,7 +335,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 	{
 		String name = toString();
 		if(name != null && !name.trim().isEmpty())
-			table.rawSet(name, Lua.newFunc(this));
+			table.rawSet(name, Lua.newMethod(this));
 	}
 
 	private static LuaObject bodyTable(LuaContext ctx)
@@ -343,7 +343,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 		HttpServletRequest request = ctx.request;
 		LuaObject table = Lua.newTable();
 
-		LuaObject func = Lua.newFunc((interp, args) -> {
+		LuaObject func = Lua.newMethod((interp, args) -> {
 			if(table.rawGet("used").getBoolean())
 				throw new LuaException("request body already used!");
 			table.rawSet("used", "string");
@@ -365,7 +365,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			}
 		});
 		table.rawSet("tostring", func);
-		table.rawSet("toreader", Lua.newFunc((interp, args) -> {
+		table.rawSet("toreader", Lua.newMethod((interp, args) -> {
 			if(table.rawGet("used").getBoolean())
 				throw new LuaException("request body already used!");
 			table.rawSet("used", "reader");
@@ -379,7 +379,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 				throw new UncheckedIOException(e);
 			}
 		}));
-		table.rawSet("tofile", Lua.newFunc((interp, args) -> {
+		table.rawSet("tofile", Lua.newMethod((interp, args) -> {
 			Lua.checkArgs("tofile", args, LuaType.STRING);
 
 			try
@@ -411,7 +411,7 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			}
 		}));
 		table.rawSet("used", Lua.FALSE);
-		table.rawSet("tojson", Lua.newFunc((interp, args) -> {
+		table.rawSet("tojson", Lua.newMethod((interp, args) -> {
 			if(table.rawGet("used").getBoolean())
 				throw new LuaException("request body already used!");
 			table.rawSet("used", "json");
@@ -448,9 +448,9 @@ public enum RequestLibrary implements BiConsumer<Environment, LuaObject>, Lua.Lu
 			case STRING:
 				return val.getString();
 			case FLOAT:
-				return val.getFloat();
+				return val.getDouble();
 			case INTEGER:
-				return val.getInteger();
+				return val.getLong();
 			case TABLE:
 				Map<Object, Object> map = new LinkedHashMap<>();
 				for(Map.Entry<LuaObject, LuaObject> ent : val.getEntries())

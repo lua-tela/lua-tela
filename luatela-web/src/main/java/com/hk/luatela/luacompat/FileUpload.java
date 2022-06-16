@@ -166,14 +166,14 @@ public class FileUpload extends LuaUserdata
     {
         uploadMetatable.rawSet("__name", NAME);
         uploadMetatable.rawSet("__index", uploadMetatable);
-        uploadMetatable.rawSet("getField", Lua.newFunc(FileUpload::getField));
-        uploadMetatable.rawSet("getName", Lua.newFunc(FileUpload::getName));
-        uploadMetatable.rawSet("getContentType", Lua.newFunc(FileUpload::getContentType));
-        uploadMetatable.rawSet("getHeader", Lua.newFunc(FileUpload::getHeader));
-        uploadMetatable.rawSet("getHeaders", Lua.newFunc(FileUpload::getHeaders));
-        uploadMetatable.rawSet("getHeaderNames", Lua.newFunc(FileUpload::getHeaderNames));
-        uploadMetatable.rawSet("getSize", Lua.newFunc(FileUpload::getSize));
-        uploadMetatable.rawSet("toFile", Lua.newFunc(FileUpload::toFile));
-        uploadMetatable.rawSet("toString", Lua.newFunc(FileUpload::toString));
+        uploadMetatable.rawSet("getField", Lua.newMethod(FileUpload::getField));
+        uploadMetatable.rawSet("getName", Lua.newMethod(FileUpload::getName));
+        uploadMetatable.rawSet("getContentType", Lua.newMethod(FileUpload::getContentType));
+        uploadMetatable.rawSet("getHeader", Lua.newMethod(FileUpload::getHeader));
+        uploadMetatable.rawSet("getHeaders", Lua.newMethod(FileUpload::getHeaders));
+        uploadMetatable.rawSet("getHeaderNames", Lua.newMethod(FileUpload::getHeaderNames));
+        uploadMetatable.rawSet("getSize", Lua.newMethod(FileUpload::getSize));
+        uploadMetatable.rawSet("toFile", Lua.newMethod(FileUpload::toFile));
+        uploadMetatable.rawSet("toString", Lua.newMethod(FileUpload::toString));
     }
 }

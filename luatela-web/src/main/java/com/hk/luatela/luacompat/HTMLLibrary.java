@@ -1,10 +1,10 @@
 package com.hk.luatela.luacompat;
 
-import com.hk.func.BiConsumer;
 import com.hk.lua.*;
 import com.hk.str.HTMLText;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 @SuppressWarnings("unused")
 public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMethod
@@ -28,7 +28,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 	{
 		String name = toString();
 		if(name != null && !name.trim().isEmpty())
-			table.setIndex(env.interp, name, Lua.newFunc(this));
+			table.setIndex(env.interp, name, Lua.newMethod(this));
 	}
 
 	private static String[] getAttrs(LuaInterpreter interp, LuaObject[] args, int indx)
@@ -101,7 +101,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 		htmlMetatable = Lua.newTable();
 		htmlMetatable.rawSet("__name", Lua.newString("HTMLText*"));
 		htmlMetatable.rawSet("__index", htmlMetatable);
-		htmlMetatable.rawSet("blockWS", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("blockWS", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("blockWS", args, LuaType.USERDATA, LuaType.BOOLEAN);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).blockWS(args[1].getBoolean());
@@ -110,7 +110,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("br", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("br", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("br", args, LuaType.USERDATA);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).br();
@@ -119,7 +119,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("close", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("close", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("close", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).close(args[1].getString());
@@ -128,7 +128,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("closeBrace", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("closeBrace", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("closeBrace", args, LuaType.USERDATA);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).closeBrace();
@@ -137,35 +137,35 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("getVar", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("getVar", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("getVar", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
 				return Lua.newString(args[0].getUserdata(HTMLText.class).getVar(args[1].getString()));
 			else
 				throw new LuaException("bad argument #1 to 'getVar' (HTMLText* expected, got " + args[0].name() + ")");
 		}));
-		htmlMetatable.rawSet("getVars", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("getVars", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("getVars", args, LuaType.USERDATA);
 			if(args[0] instanceof HTMLUserdata)
 				return Lua.newLuaObject(Arrays.asList(args[0].getUserdata(HTMLText.class).getVars()));
 			else
 				throw new LuaException("bad argument #1 to 'getVars' (HTMLText* expected, got " + args[0].name() + ")");
 		}));
-		htmlMetatable.rawSet("hasVar", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("hasVar", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("hasVar", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
 				return Lua.newBool(args[0].getUserdata(HTMLText.class).hasVar(args[1].getString()));
 			else
 				throw new LuaException("bad argument #1 to 'hasVar' (HTMLText* expected, got " + args[0].name() + ")");
 		}));
-		htmlMetatable.rawSet("isBlocking", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("isBlocking", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("isBlocking", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
 				return Lua.newBool(args[0].getUserdata(HTMLText.class).isBlocking());
 			else
 				throw new LuaException("bad argument #1 to 'isBlocking' (HTMLText* expected, got " + args[0].name() + ")");
 		}));
-		htmlMetatable.rawSet("ln", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("ln", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("ln", args, LuaType.USERDATA);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).ln();
@@ -174,7 +174,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("makeVar", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("makeVar", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("makeVar", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).makeVar(args[1].getString(), args.length > 2 ? args[2].getString() : null);
@@ -183,7 +183,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("el", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("el", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("el", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
 			{
@@ -196,7 +196,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("open", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("open", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("open", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
 			{
@@ -209,7 +209,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("openBrace", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("openBrace", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("openBrace", args, LuaType.USERDATA);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).openBrace();
@@ -218,7 +218,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("pr", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("pr", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("pr", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).pr(args[1].getString());
@@ -227,7 +227,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("prln", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("prln", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("prln", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).prln(args[1].getString());
@@ -236,7 +236,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("setVar", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("setVar", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("setVar", args, LuaType.USERDATA, LuaType.STRING, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).setVar(args[1].getString(), args[2].getString());
@@ -245,7 +245,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("tabDown", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("tabDown", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("tabDown", args, LuaType.USERDATA);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).tabDown();
@@ -254,7 +254,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("tabUp", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("tabUp", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("tabUp", args, LuaType.USERDATA);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).tabUp();
@@ -263,7 +263,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("tabs", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("tabs", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("tabs", args, LuaType.USERDATA);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).tabs();
@@ -272,7 +272,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("wr", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("wr", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("wr", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).wr(args[1].getString());
@@ -281,7 +281,7 @@ public enum HTMLLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMe
 
 			return args[0];
 		}));
-		htmlMetatable.rawSet("wrln", Lua.newFunc((LuaInterpreter interp, LuaObject[] args) -> {
+		htmlMetatable.rawSet("wrln", Lua.newMethod((LuaInterpreter interp, LuaObject[] args) -> {
 			Lua.checkArgs("wrln", args, LuaType.USERDATA, LuaType.STRING);
 			if(args[0] instanceof HTMLUserdata)
 				args[0].getUserdata(HTMLText.class).wrln(args[1].getString());

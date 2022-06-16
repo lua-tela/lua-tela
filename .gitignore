@@ -31,6 +31,7 @@ hs_err_pid*
 .idea/
 luatela-web/src/main/webapp/WEB-INF/temp.xml
 luatela-installer/src/test/base/
+luatela-core/src/test/resources/database*.json
 
 # Maven
 luatela-core/target/

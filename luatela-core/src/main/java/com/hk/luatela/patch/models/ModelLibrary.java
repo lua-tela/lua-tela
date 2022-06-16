@@ -1,6 +1,5 @@
 package com.hk.luatela.patch.models;
 
-import com.hk.func.BiConsumer;
 import com.hk.lua.*;
 import com.hk.luatela.patch.DatabaseException;
 import com.hk.luatela.patch.models.fields.*;
@@ -8,7 +7,7 @@ import com.hk.luatela.patch.models.fields.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.function.BiConsumer;
 
 @SuppressWarnings("unused")
 public enum ModelLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaMethod
@@ -25,7 +24,7 @@ public enum ModelLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaM
 			{
 				Model model = new Model(modelSet, args[0].getString());
 
-				return Lua.newFunc((interp1, args1) -> {
+				return Lua.newMethod((interp1, args1) -> {
 					Lua.checkArgs(name(), args1, LuaType.TABLE);
 					try
 					{
@@ -62,7 +61,7 @@ public enum ModelLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaM
 	{
 		String name = toString();
 		if(name != null && !name.trim().isEmpty())
-			table.setIndex(env.interp, name, Lua.newFunc(this));
+			table.setIndex(env.interp, name, Lua.newMethod(this));
 	}
 
 	private static final Map<String, LuaObject> fields = new HashMap<>();
@@ -91,7 +90,7 @@ public enum ModelLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaM
 		{
 			String k = entry.getKey();
 			DataField.Builder v = entry.getValue();
-			fields.put(k, Lua.newFunc((interp, args) -> {
+			fields.put(k, Lua.newMethod((interp, args) -> {
 				Lua.checkArgs(k, args, LuaType.TABLE);
 
 				args[0].rawSet("__builder", v);
