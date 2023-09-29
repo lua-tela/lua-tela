@@ -34,6 +34,7 @@ luatela-installer/src/test/base/
 luatela-core/src/test/resources/database*.json
 
 # Maven
+luatela-core/src/test/resources/database.properties
 luatela-core/target/
 luatela-web/target/
 luatela-installer/target/

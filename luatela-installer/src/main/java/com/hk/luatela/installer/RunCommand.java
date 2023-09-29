@@ -258,6 +258,7 @@ class RunCommand extends Installer.Command
 		String name = path.getFileName().toString();
 		return name.matches("luatela-core.*\\.jar") ||
 				name.matches("hklib.*\\.jar") ||
+				name.matches("hkodb.*\\.jar") ||
 				name.matches("mysql-connector-java.*\\.jar");
 	}
 

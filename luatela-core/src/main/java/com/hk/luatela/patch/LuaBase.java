@@ -1,5 +1,6 @@
 package com.hk.luatela.patch;
 
+import com.hk.dialect.mysql.MySQLDialect;
 import com.hk.file.FileUtil;
 import com.hk.lua.*;
 import com.hk.luatela.patch.models.Model;
@@ -16,13 +17,17 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.text.DateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LuaBase
 {
 	public final File dataroot;
+	private SequelTranslator translator;
 	private Connection connection;
+	private Supplier<Connection> connectionSupplier;
 	private ModelSet patchModelSet, modelSet;
 	private int patchCount;
 
@@ -32,11 +37,33 @@ public class LuaBase
 			throw new FileNotFoundException(dataroot.getAbsolutePath());
 
 		this.dataroot = dataroot;
+		// TODO: make it so various SQL dialects can be accepted
+		this.translator = new SequelTranslator(this, MySQLDialect.getInstance());
 	}
 
 	public void setConnection(Connection connection)
 	{
 		this.connection = connection;
+	}
+
+	public void setConnectionSupplier(Supplier<Connection> connectionSupplier)
+	{
+		this.connectionSupplier = connectionSupplier;
+	}
+
+	public Connection getConnection()
+	{
+		if(connection != null)
+			return connection;
+		else if(connectionSupplier != null)
+			return connectionSupplier.get();
+		else
+			throw new IllegalStateException("no database connection supplied!");
+	}
+
+	public boolean hasConnection()
+	{
+		return connection != null || connectionSupplier != null;
 	}
 
 	public int getPatchCount()
@@ -49,7 +76,7 @@ public class LuaBase
 		return loadPatches(null);
 	}
 
-	public int loadPatches(double[] elapsed) throws DatabaseException
+	public int loadPatches(AtomicLong elapsed) throws DatabaseException
 	{
 		if(patchModelSet != null)
 			throw new IllegalStateException("Already loaded patchy model set");
@@ -105,6 +132,13 @@ public class LuaBase
 		}));
 	}
 
+	public void attach(LuaInterpreter interp)
+	{
+		interp.setExtra(KEY, this);
+		interp.setExtra(KEY + ".conn", getConnection());
+		injectRequire(interp, dataroot.getAbsoluteFile().toPath());
+	}
+
 	static ModelSet importModelSet(ModelSet modelSet, File models) throws FileNotFoundException, DatabaseException
 	{
 		LuaInterpreter interp = Lua.reader(models);
@@ -135,7 +169,7 @@ public class LuaBase
 		return importModelSet(new ModelSet(), models);
 	}
 
-	static int applyPatches(ModelSet set, File dir, double[] elapsed) throws DatabaseException
+	static int applyPatches(ModelSet set, File dir, AtomicLong elapsed) throws DatabaseException
 	{
 		Pattern patchName = Pattern.compile("patch-(\\d+)[-\\w]*\\.lua");
 		File[] files = Objects.requireNonNull(dir.listFiles());
@@ -181,8 +215,8 @@ public class LuaBase
 			throw new Error(); // shouldn't really be possible...
 		}
 		nanos = System.nanoTime() - nanos;
-		if(elapsed != null && elapsed.length > 0)
-			elapsed[0] = nanos / 1E6D;
+		if(elapsed != null)
+			elapsed.set(nanos);
 
 		patchNo = interp.getGlobals().getVar("patchNo").getInt();
 		patchNo--;
@@ -197,7 +231,6 @@ public class LuaBase
 		LuaObject models = interp.getGlobals().getVar("models");
 
 		Model model;
-		DataField field;
 		LuaObject mdl, fld;
 		String fieldType;
 		for (Map.Entry<LuaObject, LuaObject> entry1 : models.getEntries())
@@ -239,4 +272,5 @@ public class LuaBase
 	}
 
 	public static final DateFormat FULL_FORMAT = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL);
+	public static final String KEY = LuaBase.class.getName();
 }

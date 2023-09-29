@@ -7,6 +7,7 @@ import com.hk.luatela.patch.models.fields.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 @SuppressWarnings("unused")
@@ -19,7 +20,7 @@ public enum ModelLibrary implements BiConsumer<Environment, LuaObject>, Lua.LuaM
 			Lua.checkArgs(name(), args, LuaType.STRING);
 
 			ModelSet modelSet = interp.getExtra(ModelSet.KEY, ModelSet.class);
-
+			Objects.requireNonNull(modelSet);
 			try
 			{
 				Model model = new Model(modelSet, args[0].getString());

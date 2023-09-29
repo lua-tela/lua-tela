@@ -75,7 +75,7 @@ public class PatchComparison
 			for(String name : added)
 				addedModels.add(after.getModel(name));
 		}
-		else if(!added.isEmpty() && !deleted.isEmpty())
+		else if(!added.isEmpty())
 		{
 			Model afterModel;
 			Set<String> removeBeforeNames = new HashSet<>();

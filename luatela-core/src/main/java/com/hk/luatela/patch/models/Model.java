@@ -12,6 +12,7 @@ public final class Model extends LuaUserdata
 	public final String name;
 	private final Map<String, DataField> fieldMap;
 	private List<DataField> fields;
+	final LuaObject instanceMetatable;
 
 	public Model(ModelSet set, String name) throws DatabaseException
 	{
@@ -19,6 +20,38 @@ public final class Model extends LuaUserdata
 		fieldMap = new LinkedHashMap<>();
 
 		set.addModel(this);
+
+		metatable = Lua.newTable();
+		instanceMetatable = Lua.newTable();
+		setupMetatables();
+	}
+
+	private void setupMetatables()
+	{
+		metatable.rawSet("__index", metatable);
+		metatable.rawSet("__name", name());
+
+		LuaObject saveFunc = Lua.newMethod((interp, args) -> {
+			if (args.length != 0 && args[0] instanceof Instance && ((Instance) args[0]).getModel() == this)
+			{
+				// TODO: fix this
+				return null;
+			}
+			else
+				throw Lua.badArgument(1, getString() + " save", "expected '" + name + "' instance");
+		});
+		metatable.rawSet("create", Lua.newMethod(this::create));
+		metatable.rawSet("save", saveFunc);
+
+		instanceMetatable.rawSet("__index", instanceMetatable);
+		instanceMetatable.rawSet("__name", Instance.__NAME);
+		instanceMetatable.rawSet("save", saveFunc);
+	}
+
+	private LuaObject create(LuaInterpreter interp, LuaObject[] args)
+	{
+		Lua.checkArgs(getString() + " create", args, LuaType.TABLE);
+		return Instance.apply(new Instance(this, true), args[0]);
 	}
 
 	public void setFields(List<DataField> fields) throws DatabaseException
@@ -92,6 +125,12 @@ public final class Model extends LuaUserdata
 		this.fields = fields;
 	}
 
+	@Override
+	public LuaObject doCall(LuaInterpreter interp, LuaObject[] args)
+	{
+		return create(interp, args);
+	}
+
 	public Map<String, DataField> getFieldMap()
 	{
 		return Collections.unmodifiableMap(fieldMap);
@@ -100,6 +139,16 @@ public final class Model extends LuaUserdata
 	public List<DataField> getFields()
 	{
 		return Collections.unmodifiableList(fields);
+	}
+
+	public DataField getFieldNamed(String name)
+	{
+		return fieldMap.get(name);
+	}
+
+	public boolean hasFieldNamed(String name)
+	{
+		return fieldMap.containsKey(name);
 	}
 
 	@Override
@@ -117,7 +166,7 @@ public final class Model extends LuaUserdata
 	@Override
 	public String getString(LuaInterpreter interp)
 	{
-		return name;
+		return "model '" + name + "'";
 	}
 
 	@Override

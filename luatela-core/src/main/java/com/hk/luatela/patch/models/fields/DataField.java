@@ -1,8 +1,11 @@
 package com.hk.luatela.patch.models.fields;
 
+import com.hk.lua.LuaException;
 import com.hk.lua.LuaInterpreter;
 import com.hk.lua.LuaObject;
 import com.hk.lua.LuaUserdata;
+import com.hk.luatela.patch.DatabaseException;
+import com.hk.luatela.patch.models.Instance;
 import com.hk.luatela.patch.models.Model;
 
 import java.util.Map;
@@ -19,6 +22,16 @@ public abstract class DataField extends LuaUserdata implements Comparable<DataFi
 	{
 		this.parent = parent;
 		this.name = name;
+	}
+
+	public void initialize(Instance instance)
+	{
+
+	}
+
+	public LuaObject clean(LuaObject value) throws LuaException
+	{
+		return value;
 	}
 
 	DataField accept(LuaObject properties)

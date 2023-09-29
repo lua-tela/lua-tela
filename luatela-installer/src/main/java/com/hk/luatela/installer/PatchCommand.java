@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.ref.Reference;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.hk.luatela.installer.Installer.splitToLinesByLen;
 
@@ -64,10 +65,10 @@ public abstract class PatchCommand extends Installer.Command
 	{
 		try
 		{
-			double[] elapsed = new double[1];
+			AtomicLong elapsed = new AtomicLong();
 			int patches = base.loadPatches(elapsed);
 			System.out.print("Loaded " + patches + " patch" + (patches == 1 ? "" : "es"));
-			System.out.println(" in " + ((int) (elapsed[0] * 100) / 100D) + "ms");
+			System.out.println(" in " + ((int) (elapsed.get() / 1E4D) / 100D) + "ms");
 		}
 		catch (DatabaseException e)
 		{
